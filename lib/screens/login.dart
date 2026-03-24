@@ -1,0 +1,146 @@
+import 'package:flutter/material.dart';
+
+class Login extends StatelessWidget {
+  const Login({super.key});
+  @override
+  Widget build(BuildContext context) {
+      
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 30,
+                ),
+                SizedBox(
+                  height: 280,
+                  width: 300,
+                  child: Image.asset("assets/Images/logo.jpeg"),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "System Authentication",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 36, 53, 73),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Authorized users only",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: const Color.fromARGB(255, 133, 132, 132),
+                  ),
+                ),
+                SizedBox(height: 40),
+                SizedBox(
+                  width: 370,
+                  child: TextField(
+                  decoration: InputDecoration(
+                    label: Text("User name",
+                    style: TextStyle(
+                      fontSize: 17
+                    ),),
+                    hintText: "Enter your name",
+                    hintStyle: TextStyle(
+                      fontSize: 18,
+                    ),
+
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(color: Colors.cyan, width: 3),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(color: Colors.cyan, width: 3),
+                    ),
+                  ),
+                ),
+                ),
+                
+                SizedBox(height: 30),
+                SizedBox(
+                  width: 370,
+                  child: TextField(
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    label: Text("Password",
+                    style: TextStyle(
+                      fontSize: 17
+                    ),),
+                    hintText: "Enter your Password",
+                    hintStyle: TextStyle(
+                      fontSize: 16
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(color: Colors.cyan, width: 3),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(color: Colors.cyan, width: 3),
+                    ),
+                  ),
+                ),
+                ),
+                
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Forget Password?",
+                      style: TextStyle(
+                        color: Colors.cyan,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 45),
+                Container(
+                  width: 280,
+                  height: 55,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF00C6FF), Color(0xFF0072FF)],
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: const Text(
+                      "Sign In",
+                      style: TextStyle(fontSize:20, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        
+      ),
+    );
+  }
+}
