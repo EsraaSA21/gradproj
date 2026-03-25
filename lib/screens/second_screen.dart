@@ -1,3 +1,4 @@
+import 'package:faceapp/screens/login.dart';
 import 'package:flutter/material.dart';
 
 class Secondscreen extends StatelessWidget {
@@ -5,7 +6,6 @@ class Secondscreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -24,7 +24,10 @@ class Secondscreen extends StatelessWidget {
             Text(
               "Secure and efficient student identity verification using face recognition technology",
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: const Color.fromARGB(255, 85, 85, 85)),
+              style: TextStyle(
+                fontSize: 16,
+                color: const Color.fromARGB(255, 85, 85, 85),
+              ),
             ),
             SizedBox(height: 20),
             Container(
@@ -44,7 +47,12 @@ class Secondscreen extends StatelessWidget {
                 ],
               ),
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Login()),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
@@ -54,14 +62,13 @@ class Secondscreen extends StatelessWidget {
                 ),
                 child: const Text(
                   "Get Started",
-                  style: TextStyle(fontSize:20, color: Colors.white),
+                  style: TextStyle(fontSize: 20, color: Colors.white),
                 ),
               ),
             ),
           ],
         ),
       ),
-        
     );
   }
 }

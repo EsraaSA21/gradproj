@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 
-class Scanscreen  extends StatelessWidget{
-  const Scanscreen({super.key});
+class Verifierscreen  extends StatelessWidget{
+  const Verifierscreen({super.key});
 
   @override
   Widget build(BuildContext context) {
