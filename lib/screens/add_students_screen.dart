@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class Registerscreen extends StatefulWidget {
-  const Registerscreen({super.key});
+class AddStudentsScreen extends StatefulWidget {
+  const AddStudentsScreen({super.key});
 
   @override
-  State<Registerscreen> createState() => _RegisterscreenState();
+  State<AddStudentsScreen> createState() => AddStudentsScreenState();
 }
 
-class _RegisterscreenState extends State<Registerscreen> {
+class AddStudentsScreenState extends State<AddStudentsScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _faceScanned = false;
 

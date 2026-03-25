@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:faceapp/screens/add_students_screen.dart';
 
 class RegistrarScreen extends StatelessWidget {
   const RegistrarScreen({super.key});
@@ -160,12 +161,12 @@ class RegistrarScreen extends StatelessWidget {
                       icon: PhosphorIcons.userPlus(),
                       title: "Add Student",
                      onTap: () {
- /* Navigator.push(
+ Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => AddStudentScreen(),
+      builder: (context) => AddStudentsScreen(),
     ),
-  );*/
+  );
 },
                     ),
                   ),
