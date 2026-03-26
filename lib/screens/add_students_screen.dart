@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:faceapp/screens/students_data.dart';
+import 'package:faceapp/screens/student.dart';
 
 class AddStudentsScreen extends StatefulWidget {
   const AddStudentsScreen({super.key});
@@ -10,7 +12,7 @@ class AddStudentsScreen extends StatefulWidget {
 
 class AddStudentsScreenState extends State<AddStudentsScreen> {
   final _formKey = GlobalKey<FormState>();
-  bool _faceScanned = false;
+  bool _faceScanned =false;
 
   final _studentNumberController = TextEditingController();
   final _fullNameArabicController = TextEditingController();
@@ -73,10 +75,10 @@ class AddStudentsScreenState extends State<AddStudentsScreen> {
   }
 
   void _scanFace() {
-    /*setState(() {
+    setState(() {
       _faceScanned = true;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
+    /*ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('تم مسح الوجه بنجاح'),
         backgroundColor: Colors.green,
@@ -111,14 +113,20 @@ class AddStudentsScreenState extends State<AddStudentsScreen> {
       return;
     }
 
-    // إذا كل شي تمام
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Student added successfully'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
+ students.add(
+  Student(
+    nameEn: _fullNameEnglishController.text,
+    studentNumber: _studentNumberController.text,
+    faculty: _selectedCollege ?? "",
+    major: _selectedMajor ?? "",
+    year: _selectedYear ?? "",
+    nameAr: _fullNameArabicController.text,
+    phone: _phoneController.text,
+  ),
+);
+
+Navigator.pop(context);
+}
 
   @override
   Widget build(BuildContext context) {

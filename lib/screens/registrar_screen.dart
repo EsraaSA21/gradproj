@@ -1,3 +1,4 @@
+import 'package:faceapp/screens/students_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:faceapp/screens/add_students_screen.dart';
@@ -178,12 +179,12 @@ class RegistrarScreen extends StatelessWidget {
                       icon: PhosphorIcons.listBullets(),
                       title: "Students List",
                      onTap: () {
- /* Navigator.push(
+ Navigator.push(
     context,
     MaterialPageRoute(
       builder: (context) => StudentsListScreen(),
     ),
-  );*/
+  );
 },
                     ),
                   ),
