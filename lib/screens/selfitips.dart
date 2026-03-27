@@ -33,7 +33,7 @@ class Selfitips extends StatelessWidget {
                   child: Text(
                     "Selfie Tips",
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize:25,
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),

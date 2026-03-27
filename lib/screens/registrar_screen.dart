@@ -38,7 +38,7 @@ class RegistrarScreen extends StatelessWidget {
                     children: [
                       Text(
                         "Welcome back",
-                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                        style: TextStyle(color: Colors.white70,fontSize: 17,fontWeight: FontWeight.w700),
                       ),
 
                       SizedBox(height: 4),

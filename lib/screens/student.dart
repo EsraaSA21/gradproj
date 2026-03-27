@@ -6,6 +6,8 @@ class Student {
   final String faculty;
   final String major;
   final String year;
+  final String email;
+   
 
   Student({
     required this.studentNumber,
@@ -15,5 +17,7 @@ class Student {
     required this.faculty,
     required this.major,
     required this.year,
+    required this.email,
+   
   });
 }

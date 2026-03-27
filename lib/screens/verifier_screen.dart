@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:faceapp/screens/selfitips.dart';
 
 class Verifierscreen extends StatelessWidget {
   const Verifierscreen({super.key});
@@ -86,14 +87,14 @@ class Verifierscreen extends StatelessWidget {
               SizedBox(height: 20),
 
               GestureDetector(
-                /*onTap: () {
+                onTap: () {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => (),
+        builder: (context) => (Selfitips()),
       ),
     );
-  },*/
+  },
                 child: Container(
                   width: 220,
                   height: 220,

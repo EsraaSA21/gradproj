@@ -12,7 +12,7 @@ class AddStudentsScreen extends StatefulWidget {
 
 class AddStudentsScreenState extends State<AddStudentsScreen> {
   final _formKey = GlobalKey<FormState>();
-  bool _faceScanned =false;
+  bool _faceScanned =true;
 
   final _studentNumberController = TextEditingController();
   final _fullNameArabicController = TextEditingController();
@@ -122,6 +122,8 @@ class AddStudentsScreenState extends State<AddStudentsScreen> {
     year: _selectedYear ?? "",
     nameAr: _fullNameArabicController.text,
     phone: _phoneController.text,
+    email: _emailController.text, 
+    
   ),
 );
 
@@ -402,7 +404,10 @@ Navigator.pop(context);
           _buildTextField(
             controller: _phoneController,
             hint: 'e.g., 059XXXXXXX',
-            keyboardType: TextInputType.phone,
+           keyboardType: TextInputType.phone,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
             validator: (v) =>
                 v == null || v.isEmpty ? "This field is required" : null,
           ),
@@ -415,8 +420,15 @@ Navigator.pop(context);
             controller: _emailController,
             hint: 'student@university.edu',
             keyboardType: TextInputType.emailAddress,
-            validator: (v) =>
-                v == null || v.isEmpty ? "This field is required" : null,
+           validator: (v) {
+  if (v == null || v.isEmpty) {
+    return "This field is required";
+  }
+  if (!v.contains('@')) {
+    return "Enter a valid email (must contain @)";
+  }
+  return null;
+},
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:faceapp/screens/students_data.dart';
 import 'package:flutter/material.dart';
 import 'package:faceapp/screens/student.dart';
+import 'package:faceapp/screens/students_details_sheet.dart';
 
 class StudentsListScreen extends StatefulWidget {
   @override
@@ -129,68 +130,99 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
                   delegate: SliverChildBuilderDelegate((context, index) {
                     final s = filteredStudents[index];
 
-                    return Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 16,
-                      ),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.shade200,
-                            blurRadius: 6,
-                            offset: const Offset(0, 3),
+                    return GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => StudentDetailsSheet(
+                            student: s, // 🔥 نمرر بيانات الطالب
                           ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xff7F00FF), Color(0xffE100FF)],
-                              ),
-                              borderRadius: BorderRadius.circular(12),
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 16,
+                        ),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.shade200,
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
                             ),
-                            child: const Icon(
-                              Icons.person,
-                              color: Colors.white,
-                            ),
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  s.nameEn,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize:17
-                                  ),
-                                ),
-
-                                Text("${s.studentNumber}",style: TextStyle(fontSize:18),),
-                                Row(
-                                  children: [
-                                    Icon(Icons.school, size: 20),
-                                    SizedBox(width: 8),
-                                    Text(s.faculty,style: TextStyle(fontSize:18),),
+                          ],
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Colors.blue,
+                                    Color.fromARGB(255, 139, 197, 225),
                                   ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
-
-                                Text("${s.major} • ${s.year}",style: TextStyle(fontSize:17)),
-                              ],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.person,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                        ],
+
+                            const SizedBox(width: 12),
+
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    s.nameEn,
+                                    style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                      fontSize: 20,
+                                      
+                                    ),
+                                  ),
+
+                                  Text(
+                                    "${s.studentNumber}",
+                                    style: TextStyle(fontSize: 16,color: const Color.fromARGB(255, 116, 110, 110)),
+                                  ),
+
+                                  Row(
+                                    children: [
+                                      Icon(Icons.school, size: 20),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        s.faculty,
+                                        style: TextStyle(fontSize: 16,color: const Color.fromARGB(255, 116, 110, 110)),
+                                      ),
+                                    ],
+                                  ),
+                                 
+                                      Text(
+                                        "${s.major} • ${s.year}",
+                                        style: TextStyle(fontSize: 16,color: const Color.fromARGB(255, 116, 110, 110),)
+                                      ),
+                                    ],
+                                  
+                                
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   }, childCount: filteredStudents.length),
