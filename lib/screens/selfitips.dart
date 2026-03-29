@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import'package:faceapp/screens/face_scan.dart';
 
 
 class Selfitips extends StatelessWidget {
@@ -83,7 +83,14 @@ class Selfitips extends StatelessWidget {
                 const SizedBox(height: 20),
                InkWell(
   borderRadius: BorderRadius.circular(20),
-  onTap: () {},
+  onTap: () {
+   Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>  FaceScanScreen(),
+                            ),
+   );
+  },
   child: Container(
    margin: const EdgeInsets.symmetric( horizontal: 25, vertical: 20, ), 
    height: 70,

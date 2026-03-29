@@ -3,6 +3,7 @@ import 'package:faceapp/screens/verifier_screen.dart';
 import 'package:faceapp/screens/admin_screen.dart';
 import 'package:faceapp/screens/registrar_screen.dart';
 
+
 class Login extends StatefulWidget {
   const Login({super.key});
   @override
@@ -208,7 +209,7 @@ class _LoginState extends State<Login> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const AdminScreen(),
+                                  builder: (_) => const AdminScreen (),
                                 ),
                               );
                             } else if (role == "verifier") {

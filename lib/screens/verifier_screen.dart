@@ -1,8 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:faceapp/screens/selfitips.dart';
+import 'package:faceapp/screens/verification_profile.dart';
+import 'package:faceapp/screens/login.dart';
+import 'package:faceapp/screens/settings.dart';
 
-class Verifierscreen extends StatelessWidget {
+
+class Verifierscreen extends StatefulWidget {
   const Verifierscreen({super.key});
+
+  @override
+  State<Verifierscreen> createState() => _VerifierscreenState();
+}
+
+class _VerifierscreenState extends State<Verifierscreen> {
+  String lastScan = "--:--";
+  String status = "Loading...";
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  //  محاكاة جلب البيانات من الباك اند
+  void fetchData() async {
+    await Future.delayed(Duration(seconds: 2));
+
+    setState(() {
+      lastScan = "09:30 AM";
+      status = "Verified";
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,27 +40,26 @@ class Verifierscreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              // 🔷 الهيدر
               Container(
-                alignment: Alignment.centerRight,
                 height: 140,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      const Color.fromARGB(255, 56, 165, 255),
+                      Color.fromARGB(255, 56, 165, 255),
                       Color.fromARGB(255, 3, 134, 194),
                     ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(20),
                     bottomRight: Radius.circular(20),
                   ),
                 ),
+
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    
+                    // النص
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,8 +68,7 @@ class Verifierscreen extends StatelessWidget {
                           "Welcome Back!",
                           style: TextStyle(color: Colors.white, fontSize: 18),
                         ),
-                        Text( 
-                          
+                        Text(
                           "Verifier",
                           style: TextStyle(
                             color: Colors.white,
@@ -54,56 +80,134 @@ class Verifierscreen extends StatelessWidget {
                     ),
 
                     SizedBox(width: 70),
-                    Container(
-                      alignment: Alignment.center,
-                      margin: EdgeInsets.all(20),
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 10,
-                            offset: Offset(0, 5),
-                          ),
-                        ],
+
+                    //  أيقونة البروفايل + المينيو
+                    GestureDetector(
+                      
+                      onTap: () async {
+                        final selected = await showMenu<String>(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(45),
+                       
+                          context: context,
+                          position: RelativeRect.fromLTRB(300,170, 20, 0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                           
+                          ),
+                          items: [
+                          
+                            PopupMenuItem<String>(
+                              value: 'profile',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.person_outlined, color: Colors.blue),
+                                  SizedBox(width: 10),
+                                  Text("My Profile"),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem<String>(
+                              value: 'settings',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.settings_outlined, color: Colors.blue),
+                                  SizedBox(width: 10),
+                                  Text("Settings"),
+                                ],
+                              ),
+                            ),
+                            PopupMenuDivider(),
+                            PopupMenuItem<String>(
+                              value: 'logout',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.logout, color: Colors.red),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    "Logout",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+
+                        if (selected == 'profile') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProfileScreen(),
+                            ),
+                          );
+                        } else if (selected == 'settings') {
+                          Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>SettingsScreen()),
+                  );
+                        } else if (selected == 'logout') {
+                        Navigator.pushAndRemoveUntil(
+  context,
+  MaterialPageRoute(builder: (context) => Login()),
+  (route) => false,
+);
+                        }
+                      },
+
+                      child: Container(
+                        margin: EdgeInsets.all(20),
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 10,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Icon(
+                          Icons.person_outline,
+                          size: 50,
+                          color: Colors.blue,
+                        ),
                       ),
-                      child: Icon(Icons.person, size: 50, color: Colors.blue),
                     ),
                   ],
                 ),
               ),
+
               SizedBox(height: 120),
+
+              // 🔵 عنوان
               Text(
                 "Scan to Continue",
                 style: TextStyle(
                   fontSize: 25,
-                  color: const Color.fromARGB(255, 6, 144, 213),
+                  color: Color.fromARGB(255, 6, 144, 213),
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
               SizedBox(height: 20),
 
               GestureDetector(
                 onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => (Selfitips()),
-      ),
-    );
-  },
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Selfitips()),
+                  );
+                },
                 child: Container(
                   width: 220,
                   height: 220,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       colors: [Colors.blue, Color.fromARGB(255, 3, 175, 255)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -115,7 +219,7 @@ class Verifierscreen extends StatelessWidget {
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Icon(
                         Icons.center_focus_strong,
                         color: Colors.white,
@@ -124,91 +228,102 @@ class Verifierscreen extends StatelessWidget {
                       SizedBox(height: 20),
                       Text(
                         "Face Scan",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 22),
                       ),
                     ],
                   ),
                 ),
               ),
+
               SizedBox(height: 30),
+
               Row(
                 children: [
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.only(top: 10),
-                      alignment: Alignment.topCenter,
-                      width: 150,
-                      height: 100,
-                      margin: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.history, color: Colors.blue),
-                          SizedBox(width: 6),
-                          Text(
-                            "Last Scan",
-                            style: TextStyle(
-                              fontSize: 19,
-                              color: Colors.blueGrey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  InfoCard(
+                    icon: Icons.access_time,
+                    iconColor: Colors.blue,
+                    title: "Last Scan",
+                    value: lastScan,
                   ),
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.only(top: 10),
-                      alignment: Alignment.topCenter,
-                      width: 150,
-                      height: 100,
-                      margin: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.check_circle, color: Colors.green),
-                          SizedBox(width: 6),
-                          Text(
-                            "Status",
-                            style: TextStyle(
-                              fontSize: 19,
-                              color: Colors.blueGrey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+
+                  InfoCard(
+                    icon: Icons.check_circle,
+                    iconColor: Colors.green,
+                    title: "Status",
+                    value: status,
+                    valueColor: status == "Verified"
+                        ? Colors.green
+                        : Colors.red,
                   ),
                 ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class InfoCard extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String value;
+  final Color? valueColor;
+
+  const InfoCard({
+    super.key,
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.value,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.all(15),
+        margin: EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 🔵 الأيقونة
+            Icon(icon, color: iconColor),
+
+            SizedBox(width: 10),
+
+            // 🔤 النصوص
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(title, style: TextStyle(color: Colors.grey)),
+                SizedBox(height: 5),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: valueColor ?? Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

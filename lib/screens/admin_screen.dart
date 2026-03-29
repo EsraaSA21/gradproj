@@ -9,345 +9,472 @@ class AdminScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final double horizontalPadding = screenWidth < 380 ? 14 : 18;
+    final double contentMaxWidth = screenWidth > 700 ? 560 : double.infinity;
+
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F8FB),
       body: SafeArea(
-     
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 140,
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-                gradient: LinearGradient(
-                  colors: [Colors.blue, Color.fromARGB(255, 3, 175, 255)],
-                  begin: Alignment.bottomRight,
-                  end: Alignment.topLeft,
-                ),
-              ),
-
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: contentMaxWidth),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Welcome back",
-                        style: TextStyle(color: Colors.white70, fontSize: 17,fontWeight: FontWeight.w700),
-                      ),
+                  _buildHeader(),
+                  const SizedBox(height: 18),
 
-                      SizedBox(height: 4),
-
-                      Text(
-                        " Admin",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 1.28,
+                      children: const [
+                        StatCard(
+                          icon: PhosphorIconsBold.users,
+                          title: "Total Students",
+                          value: "1,247",
+                          iconBg: Color(0xFF2F49F5),
+                          trailingIcon: Icons.bar_chart_rounded,
+                          trailingColor: Color(0xFF43D17C),
                         ),
+                        StatCard(
+                          icon: PhosphorIconsBold.bell,
+                          title: "Today's Scans",
+                          value: "342",
+                          iconBg: Color(0xFFB51CE6),
+                          trailingIcon: Icons.bar_chart_rounded,
+                          trailingColor: Color(0xFF43D17C),
+                        ),
+                        StatCard(
+                          icon: PhosphorIconsBold.checkCircle,
+                          title: "Success Rate",
+                          value: "80%",
+                          iconBg: Color(0xFF10C654),
+                          trailingIcon: Icons.bar_chart_rounded,
+                          trailingColor: Color(0xFF43D17C),
+                        ),
+                        StatCard(
+                          icon: PhosphorIconsBold.clockCountdown,
+                          title: "Active Users",
+                          value: "289",
+                          iconBg: Color(0xFFE12222),
+                          trailingDot: true,
+                          trailingColor: Color(0xFFFF6A00),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 22),
+
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: const Text(
+                      "Quick Actions",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF111827),
                       ),
+                    ),
+                  ),
 
-                      SizedBox(height: 4),
+                  const SizedBox(height: 12),
 
-                      Row(
-                        children: [
-                          Icon(
-                            PhosphorIcons.circle(),
-                            size: 10,
-                            color: Colors.white70,
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: QuickActionCard(
+                            icon: PhosphorIconsBold.userPlus,
+                            title: "Add\nStudent",
+                            iconBg: const Color(0xFF2F49F5),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const AddStudentsScreen(),
+                                ),
+                              );
+                            },
                           ),
-                          SizedBox(width: 6),
-                          Text(
-                            "admin",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 13,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: QuickActionCard(
+                            icon: PhosphorIconsBold.listBullets,
+                            title: "Students\nList",
+                            iconBg: const Color(0xFF7A1CF0),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>  StudentsListScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: QuickActionCard(
+                            icon: PhosphorIconsBold.chartBar,
+                            title: "Dashboard",
+                            iconBg: const Color(0xFF0A84FF),
+                            onTap: () async {
+                              final Uri url = Uri.parse(
+                                "https://your-dashboard-link.com",
+                              );
+                              if (!await launchUrl(url)) {
+                                throw Exception("Could not launch $url");
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFFD9E2FF),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF4F3FF),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              PhosphorIconsBold.shieldCheck,
+                              color: Color(0xFF4F46E5),
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "System Authentication",
+                                  style: TextStyle(
+                                    fontSize: 15.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF1F2A44),
+                                  ),
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  "Authorized administrators only. All actions are logged and monitored.",
+                                  style: TextStyle(
+                                    fontSize: 13.5,
+                                    height: 1.45,
+                                    color: Color(0xFF44506A),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    padding: EdgeInsets.all(12),
-                    child: Icon(
-                      PhosphorIcons.users(),
-                      color: Colors.blue,
-                      size: 35,
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 30),
-            Padding(
-              padding: const EdgeInsets.all(18),
-              child: GridView.count(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 1.3,
-                children: [
-                  statCard(
-                    icon: PhosphorIcons.users(),
-                    title: "Total Students",
-                    number: "1.2K",
-                    gradientColors: [
-                      Color.fromARGB(255, 66, 41, 255),
-                      Color.fromARGB(255, 103, 76, 255),
-                    ],
-                  ),
-                  statCard(
-                    icon: PhosphorIcons.bell(),
-                    title: "Today's Scans",
-                    number: "350",
-                    gradientColors: [
-                      Color.fromARGB(255, 255, 25, 232),
-                      Color.fromARGB(255, 144, 12, 164),
-                    ],
-                  ),
-                  statCard(
-                    icon: PhosphorIcons.checkCircle(),
-                    title: "Success Rate",
-                    number: "12.5K",
-                    gradientColors: [
-                      Color.fromARGB(255, 50, 193, 128),
-                      Color.fromARGB(255, 24, 164, 20),
-                    ],
-                  ),
-                  statCard(
-                    icon: PhosphorIcons.clock(),
-                    title: "Active Users",
-                    number: "4.8",
-                    gradientColors: [
-                      Color.fromARGB(255, 235, 111, 22),
-                      Color.fromARGB(255, 236, 65, 65),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 10),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18),
-              child: Text("Quick Actions", style: TextStyle(fontSize: 19)),
-            ),
-            SizedBox(height: 10),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: quickActionCard(
-                      icon: PhosphorIcons.userPlus(),
-                      title: "Add Student",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AddStudentsScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-
-                    const SizedBox(width: 10),
-
-                  Expanded(
-                    child: quickActionCard(
-                      icon: PhosphorIcons.listBullets(),
-                      title: "Students List",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => StudentsListScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                    const SizedBox(width: 10),
-                  Expanded(
-                    child: quickActionCard(
-                      icon: PhosphorIcons.chartBar(),
-                      title: "Dashboard",
-                     onTap: () async {
-  final Uri url = Uri.parse("https://your-dashboard-link.com");
-
-  if (!await launchUrl(url)) {
-    throw Exception('Could not launch $url');
+          ),
+        ),
+      ),
+    );
   }
-},
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 240, 252, 255),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.blue),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(13),
-                child: Text(
-                  "Limited operational permissions. You can add or edit students, but you cannot delete them or modify system settings.",
+
+  Widget _buildHeader() {
+    return Container(
+      height: 135,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF08B8D9), Color(0xFF123DDE)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF123DDE).withOpacity(0.22),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Welcome back",
                   style: TextStyle(
-                    fontSize: 13.5,
-                    color: Color.fromARGB(255, 69, 69, 69),
+                    color: Colors.white70,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
+                SizedBox(height: 4),
+                Text(
+                  "Admin",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: 6),
+                Row(
+                  children: [
+                    Icon(
+                      PhosphorIconsFill.shieldCheck,
+                      size: 15,
+                      color: Color(0xFF9AE6B4),
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      "Administrator",
+                      style: TextStyle(
+                        color: Color(0xFF9AE6B4),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 58,
+            height: 58,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.14),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(
+              PhosphorIconsBold.usersThree,
+              color: Color(0xFF0E5ACF),
+              size: 28,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class StatCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String value;
+  final Color iconBg;
+  final IconData? trailingIcon;
+  final bool trailingDot;
+  final Color trailingColor;
+
+  const StatCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.iconBg,
+    this.trailingIcon,
+    this.trailingDot = false,
+    required this.trailingColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const Spacer(),
+              trailingDot
+                  ? Container(
+                      width: 9,
+                      height: 9,
+                      decoration: BoxDecoration(
+                        color: trailingColor,
+                        shape: BoxShape.circle,
+                      ),
+                    )
+                  : Icon(
+                      trailingIcon,
+                      size: 20,
+                      color: trailingColor,
+                    ),
+            ],
+          ),
+          const Spacer(),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 13.5,
+              color: Color(0xFF4B5563),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF111827),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class QuickActionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final Color iconBg;
+  final VoidCallback onTap;
+
+  const QuickActionCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.iconBg,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        height: 130,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                icon,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1F2937),
+                height: 1.3,
               ),
             ),
           ],
         ),
       ),
-      
     );
   }
-}
-
-Widget statCard({
-  required IconData icon,
-  required String title,
-  required String number,
-  required List<Color> gradientColors,
-}) {
-  return Container(
-    padding: EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      boxShadow: [
-        BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        /// icon circle
-        Container(
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            gradient: LinearGradient(
-              colors: gradientColors,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Icon(icon, color: Colors.white),
-        ),
-
-        SizedBox(height: 12),
-
-        /// title
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 14,
-            color: const Color.fromARGB(255, 104, 104, 104),
-          ),
-        ),
-
-        SizedBox(height: 4),
-
-        /// number
-        Text(
-          number,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-      ],
-    ),
-  );
-}
-
-Widget quickActionCard({
-  required IconData icon,
-  required String title,
-  required VoidCallback onTap,
-}) {
-  return InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(18),
-    child: Container(
-       height: 115,
-       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-             gradient: const LinearGradient(
-                      colors: [Color.fromARGB(255, 35, 155, 253), Color.fromARGB(255, 6, 146, 210)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-           child: Icon(icon, color: Colors.white, size: 30),
-          ),
-
-          SizedBox(height: 8),
-
-          Text(
-            title,
-            textAlign: TextAlign.center, 
-            style: TextStyle(
-              fontSize: 14, 
-              fontWeight: FontWeight.w600,
-              color: const Color.fromARGB(255, 44, 43, 43),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
 }
