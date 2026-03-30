@@ -1,6 +1,6 @@
 import 'package:faceapp/screens/students_data.dart';
 import 'package:flutter/material.dart';
-import 'package:faceapp/screens/student.dart';
+import 'package:faceapp/models/student.dart';
 import 'package:faceapp/screens/students_details_sheet.dart';
 
 class StudentsListScreen extends StatefulWidget {
@@ -137,7 +137,7 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
                           isScrollControlled: true,
                           backgroundColor: Colors.transparent,
                           builder: (context) => StudentDetailsSheet(
-                            student: s, // 🔥 نمرر بيانات الطالب
+                            student: s, //  نمرر بيانات الطالب
                           ),
                         );
                       },

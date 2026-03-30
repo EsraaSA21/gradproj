@@ -6,7 +6,11 @@ class Secondscreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+  onWillPop: () async {
+    return false;
+  },
+   child: Scaffold(
       backgroundColor: Colors.white,
       body: Center(
         child: Column(
@@ -69,6 +73,7 @@ class Secondscreen extends StatelessWidget {
           ],
         ),
       ),
+   ),
     );
   }
 }

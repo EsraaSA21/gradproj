@@ -1,3 +1,3 @@
-import 'student.dart';
+import '../models/student.dart';
 
 List<Student> students = [];

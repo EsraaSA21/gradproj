@@ -1,7 +1,7 @@
+import 'package:faceapp/screens/second_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:faceapp/screens/selfitips.dart';
 import 'package:faceapp/screens/verification_profile.dart';
-import 'package:faceapp/screens/login.dart';
 import 'package:faceapp/screens/settings.dart';
 
 
@@ -34,7 +34,11 @@ class _VerifierscreenState extends State<Verifierscreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+    onWillPop: () async {
+      return false; // ❌ يمنع الرجوع نهائيًا
+    },
+    child: Scaffold(
       backgroundColor: const Color.fromARGB(255, 233, 244, 253),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -148,7 +152,7 @@ class _VerifierscreenState extends State<Verifierscreen> {
                         } else if (selected == 'logout') {
                         Navigator.pushAndRemoveUntil(
   context,
-  MaterialPageRoute(builder: (context) => Login()),
+  MaterialPageRoute(builder: (context) => Secondscreen()),
   (route) => false,
 );
                         }
@@ -261,6 +265,7 @@ class _VerifierscreenState extends State<Verifierscreen> {
           ),
         ),
       ),
+    ),
     );
   }
 }

@@ -1,11 +1,13 @@
+import 'package:faceapp/screens/face_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; 
 import 'package:faceapp/screens/verified_student.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:faceapp/screens/verifier_screen.dart';
 
 // ══════════════════════════════════════════════════════════════════════
 // MODEL — البيانات القادمة من الباك اند بعد نجاح الـ face scan
-// ══════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 
 
 // ══════════════════════════════════════════════════════════════════════
@@ -122,8 +124,12 @@ class _VerificationSuccessScreenState extends State<VerificationSuccessScreen>
     final double h = MediaQuery.of(context).size.height;
     double fs(double s) => s * (w / 375).clamp(0.85, 1.3);
     double dp(double s) => s * (w / 375).clamp(0.8, 1.3);
-
-    return Scaffold(
+   return WillPopScope(
+    onWillPop: () async {
+      return false; // ❌ يمنع الرجوع بزر الجهاز
+    },
+   
+    child: Scaffold(
       backgroundColor: const Color(0xFFF0F4FF),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -243,7 +249,9 @@ class _VerificationSuccessScreenState extends State<VerificationSuccessScreen>
           ),
         ),
       ),
+    )
     );
+   
   }
 
   // ── Student Card Widget ──────────────────────────────────────────────
@@ -540,8 +548,13 @@ class _VerificationSuccessScreenState extends State<VerificationSuccessScreen>
       double w, BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // يرجع لشاشة الـ Home ويمسح كل الـ stack
-        Navigator.of(context).popUntil((route) => route.isFirst);
+       Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>Verifierscreen(),
+        ),
+        (route) => false,
+      );
       },
       child: Container(
         width:  double.infinity,

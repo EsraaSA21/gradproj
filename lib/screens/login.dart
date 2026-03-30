@@ -35,6 +35,7 @@ class _LoginState extends State<Login> {
   final _passwordController = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -206,25 +207,28 @@ class _LoginState extends State<Login> {
                               return;
                             }
                             if (role == "admin") {
-                              Navigator.pushReplacement(
+                              Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const AdminScreen (),
-                                ),
+                                  builder: (_) => const AdminScreen (),),
+                              (route) => false,
+                                
                               );
                             } else if (role == "verifier") {
-                              Navigator.pushReplacement(
+                              Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => const Verifierscreen(),
                                 ),
+                                 (route) => false,
                               );
                             } else if (role == "registrar") {
-                              Navigator.pushReplacement(
+                              Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => const RegistrarScreen(),
                                 ),
+                                 (route) => false,
                               );
                             }
                           }

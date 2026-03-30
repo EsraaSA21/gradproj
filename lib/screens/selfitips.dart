@@ -7,7 +7,13 @@ class Selfitips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+    onWillPop: () async {
+      return false; // ❌ يمنع الرجوع بزر الجهاز
+    },
+   
+    child: 
+ Scaffold(
         backgroundColor: const Color.fromARGB(255, 231, 244, 255),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -122,6 +128,7 @@ class Selfitips extends StatelessWidget {
             ),
           ),
         ),
+ ),
       );
     
   }

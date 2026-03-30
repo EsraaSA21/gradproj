@@ -1,7 +1,43 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:faceapp/screens/Verification_success.dart';
+import 'package:faceapp/screens/verification_success.dart';
+import 'package:faceapp/screens/verification_failed.dart';
+import 'package:faceapp/screens/verified_student.dart';
+import 'dart:math';
+
+
+
+
+class MockApiService {
+  static Future<Map<String, dynamic>> verifyFace(String imagePath) async {
+    await Future.delayed(const Duration(seconds: 2));
+
+    bool isSuccess = Random().nextBool(); // نجاح أو فشل عشوائي
+
+    if (isSuccess) {
+      return {
+        "success": true,
+        "data": {
+          "full_name": "Ahmad Ali",
+          "student_id": "20231234",
+          "faculty": "IT",
+          "major": "Computer Science",
+          "year_level": "3",
+          "verification_time": "09:30 AM",
+          "status": "Authorized",
+          "date": "2026-03-30"
+        }
+      };
+    } else {
+      return {
+        "success": false,
+        "message": "Face not recognized"
+      };
+    }
+  }
+}
+
 // ══════════════════════════════════════════════════════════════════════
 // FACE SCAN SCREEN
 // ══════════════════════════════════════════════════════════════════════
@@ -17,16 +53,15 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   CameraController? _cameraController;
   List<CameraDescription> _cameras = [];
   bool _isCameraReady = false;
-  String _scanStatus = "Position your face in the frame";
+  bool _isScanning    = false;
+  String _scanStatus  = "Position your face in the frame";
 
-  // ── Animations ──────────────────────────────────────────────────────
   late AnimationController _pulseController;
   late AnimationController _scanLineController;
   late AnimationController _cornerController;
-
-  late Animation<double> _pulseAnim;
-  late Animation<double> _scanLineAnim;
-  late Animation<double> _cornerAnim;
+  late Animation<double>   _pulseAnim;
+  late Animation<double>   _scanLineAnim;
+  late Animation<double>   _cornerAnim;
 
   @override
   void initState() {
@@ -36,57 +71,36 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   }
 
   void _initAnimations() {
-    // Pulse glow
     _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    )..repeat(reverse: true);
+        vsync: this, duration: const Duration(milliseconds: 1800))
+      ..repeat(reverse: true);
     _pulseAnim = Tween<double>(begin: 0.4, end: 1.0).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
+        CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
 
-    // Scan line sweep
     _scanLineController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    )..repeat(reverse: true);
+        vsync: this, duration: const Duration(milliseconds: 2200))
+      ..repeat(reverse: true);
     _scanLineAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _scanLineController, curve: Curves.easeInOut),
-    );
+        CurvedAnimation(parent: _scanLineController, curve: Curves.easeInOut));
 
-    // Corner brackets fade-in
     _cornerController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    )..forward();
-    _cornerAnim = CurvedAnimation(
-      parent: _cornerController,
-      curve: Curves.easeOut,
-    );
+        vsync: this, duration: const Duration(milliseconds: 800))
+      ..forward();
+    _cornerAnim =
+        CurvedAnimation(parent: _cornerController, curve: Curves.easeOut);
   }
 
   Future<void> _initCamera() async {
     try {
       _cameras = await availableCameras();
-
-      // تفضيل الكاميرا الأمامية
-      final frontCamera = _cameras.firstWhere(
+      final front = _cameras.firstWhere(
         (c) => c.lensDirection == CameraLensDirection.front,
         orElse: () => _cameras.first,
       );
-
-      _cameraController = CameraController(
-        frontCamera,
-        ResolutionPreset.high,
-        enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.jpeg,
-      );
-
+      _cameraController = CameraController(front, ResolutionPreset.high,
+          enableAudio: false, imageFormatGroup: ImageFormatGroup.jpeg);
       await _cameraController!.initialize();
-
-      if (mounted) {
-        setState(() => _isCameraReady = true);
-      }
+      if (mounted) setState(() => _isCameraReady = true);
     } catch (e) {
       debugPrint('Camera error: $e');
     }
@@ -101,49 +115,75 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     super.dispose();
   }
 
-  // ── Capture ──────────────────────────────────────────────────────────
+  // ── Capture & Scan ───────────────────────────────────────────────────
   Future<void> _captureAndScan() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) {
-      return;
-    }
+    if (_isScanning) return;
+    if (_cameraController == null || !_cameraController!.value.isInitialized) return;
 
-    setState(() => _scanStatus = "Scanning...");
+    setState(() {
+      _isScanning = true;
+      _scanStatus = "Scanning...";
+    });
 
     try {
       final XFile image = await _cameraController!.takePicture();
 
-      // ✏️ هنا ترسل الصورة للباك اند
-      // await ApiService.verifyFace(image.path);
+      //  Mock بدل الباك اند
+      final response = await MockApiService.verifyFace(image.path);
 
-      if (mounted) {
-  setState(() => _scanStatus = "✓ Scan Complete");
-  await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return;
 
-  // ✏️ هون ترسل الصورة للباك اند وتاخذ الـ response
-  // final response = await ApiService.verifyFace(image.path);
-  // final student = VerifiedStudent.fromJson(response);
+      if (response['success'] == true) {
+        // ✅ نجاح
+        setState(() => _scanStatus = "✓ Scan Complete");
+        await Future.delayed(const Duration(milliseconds: 700));
+        if (!mounted) return;
 
-  Navigator.pushReplacement(        // ← بدل pop
-    context,
-    MaterialPageRoute(
-      builder: (_) => VerificationSuccessScreen(
-        // student: student,        // ← مررها لما تربط الباك اند
-      ),
-    ),
-  );
-}
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => VerificationSuccessScreen(
+              student:VerifiedStudent.fromJson(response['data']),
+            ),
+          ),
+        );
+      } else {
+        // ❌ فشل
+        setState(() => _scanStatus = "✗ Verification Failed");
+        await Future.delayed(const Duration(milliseconds: 700));
+        if (!mounted) return;
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => VerificationFailedScreen(
+              errorMessage: response['message'],
+            ),
+          ),
+        );
+      }
     } catch (e) {
-      setState(() => _scanStatus = "Scan failed. Try again.");
+      setState(() => _scanStatus = "✗ Error. Try again.");
+      await Future.delayed(const Duration(milliseconds: 700));
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const VerificationFailedScreen(
+            errorMessage: "Something went wrong. Please try again.",
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isScanning = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Size screen = MediaQuery.of(context).size;
-    final double w = screen.width;
-    final double h = screen.height;
-
-    // حجم الـ oval frame
+    final double w      = MediaQuery.of(context).size.width;
+    final double h      = MediaQuery.of(context).size.height;
     final double frameW = w * 0.68;
     final double frameH = h * 0.42;
 
@@ -151,71 +191,52 @@ class _FaceScanScreenState extends State<FaceScanScreen>
       backgroundColor: const Color(0xFF050D1A),
       body: Stack(
         children: [
-          // ── Camera feed ──────────────────────────────────────────
-          if (_isCameraReady && _cameraController != null)
-            Positioned.fill(
-              child: CameraPreview(_cameraController!),
-            )
-          else
-            Positioned.fill(
-              child: Container(color: const Color(0xFF050D1A)),
-            ),
 
-          // ── Dark overlay with oval hole ──────────────────────────
+          // ── Camera / dark bg ─────────────────────────────────────
+          _isCameraReady && _cameraController != null
+              ? Positioned.fill(child: CameraPreview(_cameraController!))
+              : Positioned.fill(
+                  child: Container(color: const Color(0xFF050D1A))),
+
+          // ── Oval cutout overlay ──────────────────────────────────
           Positioned.fill(
-            child: _OvalCutoutOverlay(
-              frameW: frameW,
-              frameH: frameH,
-            ),
-          ),
+              child: _OvalCutoutOverlay(frameW: frameW, frameH: frameH)),
 
-          // ── Scan line inside oval ─────────────────────────────────
+          // ── Scan line ────────────────────────────────────────────
           Center(
             child: SizedBox(
-              width:  frameW,
-              height: frameH,
+              width: frameW, height: frameH,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(frameW / 2),
                 child: AnimatedBuilder(
                   animation: _scanLineAnim,
-                  builder: (_, __) {
-                    return Stack(
-                      children: [
-                        Positioned(
-                          top:  frameH * _scanLineAnim.value - 1,
-                          left: 0,
-                          right: 0,
-                          child: AnimatedBuilder(
-                            animation: _pulseAnim,
-                            builder: (_, __) => Opacity(
-                              opacity: _pulseAnim.value,
-                              child: Container(
-                                height: 2,
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.transparent,
-                                      Color(0xFF00D4FF),
-                                      Color(0xFF00FFEA),
-                                      Color(0xFF00D4FF),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color:Color(0x9900D4FF),
-                                      blurRadius:  12,
-                                      spreadRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                  builder: (_, __) => Stack(children: [
+                    Positioned(
+                      top: frameH * _scanLineAnim.value - 1,
+                      left: 0, right: 0,
+                      child: AnimatedBuilder(
+                        animation: _pulseAnim,
+                        builder: (_, __) => Opacity(
+                          opacity: _pulseAnim.value,
+                          child: Container(
+                            height: 2,
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(colors: [
+                                Colors.transparent,
+                                Color(0xFF00D4FF),
+                                Color(0xFF00FFEA),
+                                Color(0xFF00D4FF),
+                                Colors.transparent,
+                              ]),
+                              boxShadow: [BoxShadow(
+                                  color: Color(0x9900D4FF),
+                                  blurRadius: 12, spreadRadius: 4)],
                             ),
                           ),
                         ),
-                      ],
-                    );
-                  },
+                      ),
+                    ),
+                  ]),
                 ),
               ),
             ),
@@ -226,8 +247,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
             child: FadeTransition(
               opacity: _cornerAnim,
               child: SizedBox(
-                width:  frameW + 24,
-                height: frameH + 24,
+                width: frameW + 24, height: frameH + 24,
                 child: CustomPaint(
                   painter: _CornerBracketsPainter(
                     color: const Color(0xFF00D4FF),
@@ -238,27 +258,22 @@ class _FaceScanScreenState extends State<FaceScanScreen>
             ),
           ),
 
-          // ── Oval border glow ─────────────────────────────────────
+          // ── Oval glow border ─────────────────────────────────────
           Center(
             child: AnimatedBuilder(
               animation: _pulseAnim,
               builder: (_, __) => Container(
-                width:  frameW,
-                height: frameH,
+                width: frameW, height: frameH,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(frameW / 2),
                   border: Border.all(
-                    color: Color.fromRGBO(
-                        0, 212, 255, _pulseAnim.value * 0.6),
+                    color: Color.fromRGBO(0, 212, 255, _pulseAnim.value * 0.6),
                     width: 1.5,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color:       Color.fromRGBO(0, 212, 255, _pulseAnim.value * 0.25),
-                      blurRadius:  20,
-                      spreadRadius: 2,
-                    ),
-                  ],
+                  boxShadow: [BoxShadow(
+                    color: Color.fromRGBO(0, 212, 255, _pulseAnim.value * 0.25),
+                    blurRadius: 20, spreadRadius: 2,
+                  )],
                 ),
               ),
             ),
@@ -266,50 +281,37 @@ class _FaceScanScreenState extends State<FaceScanScreen>
 
           // ── Top bar ──────────────────────────────────────────────
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
+            top: 0, left: 0, right: 0,
             child: SafeArea(
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: w * 0.05, vertical: 12),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color:        const Color.fromARGB(255, 58, 111, 233).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border:       Border.all(
-                              color: Colors.white.withOpacity(0.15)),
-                        ),
-                        child: const Icon(Icons.arrow_back_ios_new,
-                            color: Colors.white, size: 18),
+                padding: EdgeInsets.symmetric(horizontal: w * 0.05, vertical: 12),
+                child: Row(children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white.withOpacity(0.15)),
                       ),
+                      child: const Icon(Icons.arrow_back_ios_new,
+                          color: Colors.white, size: 18),
                     ),
-                    const SizedBox(width:18),
-                    const Text(
-                      "Face Scan",
+                  ),
+                  const SizedBox(width: 14),
+                  const Text("Face Scan",
                       style: TextStyle(
-                        color:      Colors.white,
-                        fontSize:   20,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing:.5,
-                      ),
-                    ),
-                  ],
-                ),
+                          color: Colors.white, fontSize: 20,
+                          fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                ]),
               ),
             ),
           ),
 
           // ── Status text ──────────────────────────────────────────
           Positioned(
-            bottom: h * 0.22,
-            left: 0,
-            right: 0,
+            bottom: h * 0.22, left: 0, right: 0,
             child: AnimatedBuilder(
               animation: _pulseAnim,
               builder: (_, __) => Opacity(
@@ -317,33 +319,32 @@ class _FaceScanScreenState extends State<FaceScanScreen>
                 child: Text(
                   _scanStatus,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color:       Color(0xFF00D4FF),
-                    fontSize:    15,
-                    letterSpacing: 1.5,
+                  style: TextStyle(
+                    color: _scanStatus.contains("✓")
+                        ? Colors.greenAccent
+                        : _scanStatus.contains("✗")
+                            ? Colors.redAccent
+                            : const Color(0xFF00D4FF),
+                    fontSize: 15, letterSpacing: 0.8,
                   ),
                 ),
               ),
             ),
           ),
 
-          // ── Dots indicator ───────────────────────────────────────
+          // ── Dots ─────────────────────────────────────────────────
           Positioned(
-            bottom: h * 0.175,
-            left: 0,
-            right: 0,
+            bottom: h * 0.175, left: 0, right: 0,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(3, (i) => AnimatedBuilder(
                 animation: _scanLineController,
                 builder: (_, __) {
-                  final active =
-                      (_scanLineController.value * 3).floor() % 3 == i;
+                  final active = (_scanLineController.value * 3).floor() % 3 == i;
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width:  active ? 18 : 7,
-                    height: 7,
+                    width: active ? 18 : 7, height: 7,
                     decoration: BoxDecoration(
                       color: active
                           ? const Color(0xFF00D4FF)
@@ -358,35 +359,38 @@ class _FaceScanScreenState extends State<FaceScanScreen>
 
           // ── Capture button ───────────────────────────────────────
           Positioned(
-            bottom: h * 0.055,
-            left: 0,
-            right: 0,
+            bottom: h * 0.055, left: 0, right: 0,
             child: Center(
               child: GestureDetector(
-                onTap: _captureAndScan,
+                onTap: _isScanning ? null : _captureAndScan,
                 child: AnimatedBuilder(
                   animation: _pulseAnim,
-                  builder: (_, __) => Container(
-                    width:  80,
-                    height: 80,
+                  builder: (_, __) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: 80, height: 80,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF00D4FF), Color(0xFF0080FF)],
+                      gradient: LinearGradient(
+                        colors: _isScanning
+                            ? [Colors.grey.shade600, Colors.grey.shade800]
+                            : [const Color(0xFF00D4FF), const Color(0xFF0080FF)],
                         begin: Alignment.topLeft,
                         end:   Alignment.bottomRight,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color.fromRGBO(
-                              0, 212, 255, _pulseAnim.value * 0.55),
-                          blurRadius:  23,
-                          spreadRadius: 4,
-                        ),
-                      ],
+                      boxShadow: [BoxShadow(
+                        color: Color.fromRGBO(0, 212, 255,
+                            _isScanning ? 0.1 : _pulseAnim.value * 0.55),
+                        blurRadius: 25, spreadRadius: 4,
+                      )],
                     ),
-                    child: const Icon(Icons.camera_alt_rounded,
-                        color: Colors.white, size: 34),
+                    child: _isScanning
+                        ? const Padding(
+                            padding: EdgeInsets.all(22),
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2.5),
+                          )
+                        : const Icon(Icons.camera_alt_rounded,
+                            color: Colors.white, size: 34),
                   ),
                 ),
               ),
@@ -399,119 +403,69 @@ class _FaceScanScreenState extends State<FaceScanScreen>
 }
 
 // ══════════════════════════════════════════════════════════════════════
-// OVAL CUTOUT OVERLAY
+// PAINTERS
 // ══════════════════════════════════════════════════════════════════════
 class _OvalCutoutOverlay extends StatelessWidget {
-  final double frameW;
-  final double frameH;
-
+  final double frameW, frameH;
   const _OvalCutoutOverlay({required this.frameW, required this.frameH});
-
   @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _OvalCutoutPainter(frameW: frameW, frameH: frameH),
-    );
-  }
+  Widget build(BuildContext context) =>
+      CustomPaint(painter: _OvalCutoutPainter(frameW: frameW, frameH: frameH));
 }
 
 class _OvalCutoutPainter extends CustomPainter {
-  final double frameW;
-  final double frameH;
-
+  final double frameW, frameH;
   _OvalCutoutPainter({required this.frameW, required this.frameH});
-
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-
-    final outerPath = Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    final ovalPath = Path()
-      ..addOval(Rect.fromCenter(
-          center: center, width: frameW, height: frameH));
-
-    final cutout = Path.combine(
-        PathOperation.difference, outerPath, ovalPath);
-
+    final c = Offset(size.width / 2, size.height / 2);
     canvas.drawPath(
-      cutout,
-      Paint()..color = const Color.fromARGB(204, 12, 29, 58),
+      Path.combine(
+        PathOperation.difference,
+        Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height)),
+        Path()..addOval(Rect.fromCenter(center: c, width: frameW, height: frameH)),
+      ),
+      Paint()..color = const Color(0xCC050D1A),
     );
   }
-
   @override
-  bool shouldRepaint(_OvalCutoutPainter old) =>
-      old.frameW != frameW || old.frameH != frameH;
+  bool shouldRepaint(_OvalCutoutPainter o) =>
+      o.frameW != frameW || o.frameH != frameH;
 }
 
-// ══════════════════════════════════════════════════════════════════════
-// CORNER BRACKETS PAINTER
-// ══════════════════════════════════════════════════════════════════════
 class _CornerBracketsPainter extends CustomPainter {
-  final Color color;
-  final Color glowColor;
-
+  final Color color, glowColor;
   _CornerBracketsPainter({required this.color, required this.glowColor});
-
   @override
   void paint(Canvas canvas, Size size) {
-    final double len = 28.0;
-    final double r   = 10.0;
-    final double sw  = 3.0;
-
+    const len = 28.0, r = 10.0, sw = 3.0;
     final paint = Paint()
-      ..color       = color
-      ..strokeWidth = sw
-      ..style       = PaintingStyle.stroke
-      ..strokeCap   = StrokeCap.round;
-
+      ..color = color ..strokeWidth = sw
+      ..style = PaintingStyle.stroke ..strokeCap = StrokeCap.round;
     final glow = Paint()
-      ..color       = glowColor
-      ..strokeWidth = sw + 6
-      ..style       = PaintingStyle.stroke
-      ..strokeCap   = StrokeCap.round
-      ..maskFilter  = const MaskFilter.blur(BlurStyle.normal, 8);
-
-    final corners = [
-      // top-left
-      _CornerData(Offset(0, 0),                 1,  1),
-      // top-right
-      _CornerData(Offset(size.width, 0),        -1,  1),
-      // bottom-left
-      _CornerData(Offset(0, size.height),        1, -1),
-      // bottom-right
-      _CornerData(Offset(size.width, size.height), -1, -1),
-    ];
-
-    for (final c in corners) {
-      final path = Path();
-      path.moveTo(c.origin.dx + c.sx * len, c.origin.dy);
-      path.lineTo(c.origin.dx + c.sx * r,   c.origin.dy);
-      path.quadraticBezierTo(
-        c.origin.dx, c.origin.dy,
-        c.origin.dx, c.origin.dy + c.sy * r,
-      );
-      path.lineTo(c.origin.dx, c.origin.dy + c.sy * len);
-
-      canvas.drawPath(path, glow);
-      canvas.drawPath(path, paint);
+      ..color = glowColor ..strokeWidth = sw + 6
+      ..style = PaintingStyle.stroke ..strokeCap = StrokeCap.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+    for (final c in [
+      _CD(Offset(0, 0),                    1,  1),
+      _CD(Offset(size.width, 0),          -1,  1),
+      _CD(Offset(0, size.height),          1, -1),
+      _CD(Offset(size.width, size.height),-1, -1),
+    ]) {
+      final p = Path()
+        ..moveTo(c.o.dx + c.sx * len, c.o.dy)
+        ..lineTo(c.o.dx + c.sx * r,   c.o.dy)
+        ..quadraticBezierTo(c.o.dx, c.o.dy, c.o.dx, c.o.dy + c.sy * r)
+        ..lineTo(c.o.dx, c.o.dy + c.sy * len);
+      canvas.drawPath(p, glow);
+      canvas.drawPath(p, paint);
     }
   }
-
   @override
   bool shouldRepaint(_) => false;
 }
 
-class _CornerData {
-  final Offset origin;
-  final double sx; // sign x
-  final double sy; // sign y
-  _CornerData(this.origin, this.sx, this.sy);
+class _CD {
+  final Offset o; final double sx, sy;
+  _CD(this.o, this.sx, this.sy);
 }
-
-
-// ══════════════════════════════════════════════════════════════════════
-// SELFIE TIPS  —  زر Start Face Scan يفتح FaceScanScreen
-// ══════════════════════════════════════════════════════════════════════

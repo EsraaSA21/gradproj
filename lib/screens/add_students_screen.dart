@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:faceapp/screens/students_data.dart';
-import 'package:faceapp/screens/student.dart';
+import 'package:faceapp/models/student.dart';
+import 'dart:async';
+import 'package:faceapp/screens/face_video.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // 🔥 مهم
 
 class AddStudentsScreen extends StatefulWidget {
   const AddStudentsScreen({super.key});
@@ -12,7 +16,8 @@ class AddStudentsScreen extends StatefulWidget {
 
 class AddStudentsScreenState extends State<AddStudentsScreen> {
   final _formKey = GlobalKey<FormState>();
-  bool _faceScanned =true;
+  bool _faceScanned = false;
+  String? _videoPath; // مسار الفيديو بعد التسجيل
 
   final _studentNumberController = TextEditingController();
   final _fullNameArabicController = TextEditingController();
@@ -33,28 +38,27 @@ class AddStudentsScreenState extends State<AddStudentsScreen> {
       'Chemical Engineering',
       'Architecture',
       'Industrial Engineering',
-      
     ],
     'IT': [
       'Computer Science',
-       'Information Systems', 
-       'Software Engineering',
-       'Cybersecurity',
-       'Data Science',
-       'Artificial Intelligence',
-       'Network Engineering',
-       
-       ],
-     'Business': [
-      'Accounting', 
-      'Marketing', 
+      'Information Systems',
+      'Software Engineering',
+      'Cybersecurity',
+      'Data Science',
+      'Artificial Intelligence',
+      'Network Engineering',
+    ],
+    'Business': [
+      'Accounting',
+      'Marketing',
       'Finance',
       'Human Resource Management',
       'International Business',
       'Entrepreneurship',
       'Supply Chain Management',
-      ],
+    ],
   };
+
   final List<String> _years = [
     'First Year',
     'Second Year',
@@ -70,65 +74,114 @@ class AddStudentsScreenState extends State<AddStudentsScreen> {
     _fullNameEnglishController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
-
     super.dispose();
   }
 
-  void _scanFace() {
-    setState(() {
-      _faceScanned = true;
-    });
-    /*ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('تم مسح الوجه بنجاح'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-      ),
-    );*/
+  // ── فتح كاميرا الفيديو
+  Future<void> _openFaceScan() async {
+    final result = await Navigator.push<String?>(
+      context,
+      MaterialPageRoute(builder: (_) => const FaceVideoScreen()),
+    );
+
+    if (result != null) {
+      setState(() {
+        _videoPath = result;
+        _faceScanned = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 8),
+              Text("Face scanned successfully!"),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
-  void _submitForm() {
-    // تحقق من الفورم
+  Future<void> _submitForm() async {
+  
     bool isFormValid = _formKey.currentState!.validate();
-
-    // تحقق من الوجه
     bool isFaceValid = _faceScanned;
 
-    // إذا في أي خطأ
     if (!isFormValid || !isFaceValid) {
-      String message = "";
-
-      if (!isFormValid && !isFaceValid) {
-        message = "Please fill all fields and scan your face";
-      } else if (!isFormValid) {
-        message = "Please fill all required fields";
-      } else if (!isFaceValid) {
-        message = "Please scan your face";
-      }
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text("Fill all fields and scan face ❗"),
+          backgroundColor: Colors.red,
+        ),
       );
-
       return;
     }
 
- students.add(
-  Student(
-    nameEn: _fullNameEnglishController.text,
-    studentNumber: _studentNumberController.text,
-    faculty: _selectedCollege ?? "",
-    major: _selectedMajor ?? "",
-    year: _selectedYear ?? "",
-    nameAr: _fullNameArabicController.text,
-    phone: _phoneController.text,
-    email: _emailController.text, 
-    
-  ),
-);
+    bool _isLoading;
+    setState(() => _isLoading = true);
 
-Navigator.pop(context);
-}
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse(
+          'https://your-server.com/api/add-student',
+        ), // 🔁 حط رابطك الحقيقي
+      );
+
+      request.files.add(
+        await http.MultipartFile.fromPath('video', _videoPath!),
+      );
+
+      request.fields['nameEn'] = _fullNameEnglishController.text;
+      request.fields['studentNumber'] = _studentNumberController.text;
+      request.fields['faculty'] = _selectedCollege ?? "";
+      request.fields['major'] = _selectedMajor ?? "";
+      request.fields['year'] = _selectedYear ?? "";
+      request.fields['nameAr'] = _fullNameArabicController.text;
+      request.fields['phone'] = _phoneController.text;
+      request.fields['email'] = _emailController.text;
+
+      var response = await request.send();
+
+      var responseData = await response.stream.bytesToString();
+
+      var data = jsonDecode(responseData);
+
+      setState(() => _isLoading = false);
+
+      if (response.statusCode == 200 && data["success"] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Student added successfully ✅"),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data["message"] ?? "Failed to add student ❌"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Connection error "),
+          backgroundColor: Colors.red,
+        ),
+      );
+
+      print("Error: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,10 +191,11 @@ Navigator.pop(context);
         child: SingleChildScrollView(
           child: Column(
             children: [
+              // Header
               Container(
                 height: 120,
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Colors.blue, Color(0xFF0AA1DD)],
                   ),
@@ -150,29 +204,27 @@ Navigator.pop(context);
                     bottomRight: Radius.circular(20),
                   ),
                 ),
-
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
                         GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
+                          onTap: () => Navigator.pop(context),
                           child: Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
                               color: Colors.white24,
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(Icons.arrow_back, color: Colors.white),
+                            child: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-
-                        SizedBox(width: 20),
-
-                        Text(
+                        const SizedBox(width: 20),
+                        const Text(
                           "Add New Student",
                           style: TextStyle(
                             color: Colors.white,
@@ -182,7 +234,7 @@ Navigator.pop(context);
                         ),
                       ],
                     ),
-                    CircleAvatar(
+                    const CircleAvatar(
                       backgroundColor: Colors.white,
                       child: Icon(
                         Icons.person_add,
@@ -205,16 +257,12 @@ Navigator.pop(context);
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Face Embedding Card
                       _buildFaceCard(),
                       const SizedBox(height: 16),
-                      // Personal Information Card
                       _buildPersonalInfoCard(),
                       const SizedBox(height: 16),
-                      // Academic Information Card
                       _buildAcademicInfoCard(),
                       const SizedBox(height: 24),
-                      // Submit Button
                       _buildSubmitButton(),
                       const SizedBox(height: 24),
                     ],
@@ -228,6 +276,7 @@ Navigator.pop(context);
     );
   }
 
+  // ── Face Card ────────────────────────────────────────────────────────
   Widget _buildFaceCard() {
     return Container(
       width: double.infinity,
@@ -260,66 +309,103 @@ Navigator.pop(context);
             ],
           ),
           const SizedBox(height: 16),
+
+          // أيقونة الوجه — تتغير بعد الـ scan
           Center(
-            child: Container(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 400),
               width: 110,
               height: 110,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.grey[200],
+                color: _faceScanned
+                    ? Colors.green.withOpacity(0.1)
+                    : Colors.grey[200],
                 border: Border.all(
-                  color: Colors.grey,
-                  width: 1.5,
-                  style: BorderStyle.solid,
+                  color: _faceScanned ? Colors.green : Colors.grey,
+                  width: 2,
                 ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: 15),
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
+              child: _faceScanned
+                  ? const Icon(
+                      Icons.check_circle_rounded,
+                      color: Colors.green,
+                      size: 55,
+                    )
+                  : Center(
+                      child: SizedBox(
                         width: 48,
                         height: 48,
                         child: CustomPaint(painter: _CornerBracketPainter()),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
             ),
           ),
+
+          // Status text
+          if (_faceScanned)
+            const Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Center(
+                child: Text(
+                  "Face recorded ✓",
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+
+          const SizedBox(height: 4),
+
+          // Scan Button
           Center(
             child: InkWell(
-              onTap: _scanFace,
-              borderRadius: BorderRadius.circular(10),
+              onTap: _openFaceScan,
+              borderRadius: BorderRadius.circular(15),
               child: Container(
-                width: 150,
-                height: 60,
-                margin: const EdgeInsets.only(top: 16),
+                width: 160,
+                height: 55,
+                margin: const EdgeInsets.only(top: 12),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF1A73E8), Color(0xFF0AA1DD)],
+                    colors: _faceScanned
+                        ? [Colors.green, Colors.teal]
+                        : [const Color(0xFF1A73E8), const Color(0xFF0AA1DD)],
                     begin: Alignment.bottomRight,
                     end: Alignment.topLeft,
                   ),
-
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color:
+                          (_faceScanned
+                                  ? Colors.green
+                                  : const Color(0xFF1A73E8))
+                              .withOpacity(0.35),
+                      blurRadius: 12,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.camera_alt, color: Colors.white, size: 22),
-                    SizedBox(width: 10),
+                    Icon(
+                      _faceScanned ? Icons.videocam : Icons.camera_alt,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 8),
                     Text(
-                      "scan face",
-                      style: TextStyle(
+                      _faceScanned ? "Re-scan" : "Scan Face",
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
-                        fontSize: 20,
+                        fontSize: 18,
                       ),
                     ),
                   ],
@@ -355,13 +441,11 @@ Navigator.pop(context);
             style: TextStyle(fontSize: 20, color: Color(0xFF1E293B)),
           ),
           const SizedBox(height: 20),
-          // Student Number
           _buildLabel('Student Number', required: true),
           const SizedBox(height: 8),
           _buildTextField(
             controller: _studentNumberController,
             hint: 'e.g., 202301001',
-
             keyboardType: TextInputType.number,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
@@ -374,8 +458,6 @@ Navigator.pop(context);
             },
           ),
           const SizedBox(height: 16),
-
-          // Full Name Arabic
           _buildLabel('Full Name (Arabic)', required: true),
           const SizedBox(height: 8),
           _buildTextField(
@@ -386,8 +468,6 @@ Navigator.pop(context);
                 v == null || v.isEmpty ? "This field is required" : null,
           ),
           const SizedBox(height: 16),
-
-          // Full Name English
           _buildLabel('Full Name (English)', required: true),
           const SizedBox(height: 8),
           _buildTextField(
@@ -397,38 +477,29 @@ Navigator.pop(context);
                 v == null || v.isEmpty ? "This field is required" : null,
           ),
           const SizedBox(height: 16),
-
-          // Phone Number
           _buildLabel('Phone Number', required: true),
           const SizedBox(height: 8),
           _buildTextField(
             controller: _phoneController,
             hint: 'e.g., 059XXXXXXX',
-           keyboardType: TextInputType.phone,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-            ],
+            keyboardType: TextInputType.phone,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             validator: (v) =>
                 v == null || v.isEmpty ? "This field is required" : null,
           ),
           const SizedBox(height: 16),
-
-          // Email
           _buildLabel('Email Address', required: true),
           const SizedBox(height: 8),
           _buildTextField(
             controller: _emailController,
             hint: 'student@university.edu',
             keyboardType: TextInputType.emailAddress,
-           validator: (v) {
-  if (v == null || v.isEmpty) {
-    return "This field is required";
-  }
-  if (!v.contains('@')) {
-    return "Enter a valid email (must contain @)";
-  }
-  return null;
-},
+            validator: (v) {
+              if (v == null || v.isEmpty) return "This field is required";
+              if (!v.contains('@'))
+                return "Enter a valid email (must contain @)";
+              return null;
+            },
           ),
         ],
       ),
@@ -468,18 +539,12 @@ Navigator.pop(context);
             value: _selectedCollege,
             hint: 'Select College',
             items: _majorsByCollege.keys.toList(),
-            onChanged: (val) {
-              setState(() {
-                _selectedCollege = val;
-
-                // 🔥 مهم جدًا
-                _selectedMajor = null; // تصفير التخصص
-              });
-            },
+            onChanged: (val) => setState(() {
+              _selectedCollege = val;
+              _selectedMajor = null;
+            }),
           ),
           const SizedBox(height: 16),
-
-          // Major
           _buildLabel('Major', required: true),
           const SizedBox(height: 8),
           _buildDropdown(
@@ -488,15 +553,9 @@ Navigator.pop(context);
             items: _selectedCollege == null
                 ? []
                 : _majorsByCollege[_selectedCollege]!,
-            onChanged: (val) {
-              setState(() {
-                _selectedMajor = val;
-              });
-            },
+            onChanged: (val) => setState(() => _selectedMajor = val),
           ),
           const SizedBox(height: 16),
-
-          // Academic Year
           _buildLabel('Academic Year'),
           const SizedBox(height: 8),
           _buildDropdown(
@@ -505,9 +564,6 @@ Navigator.pop(context);
             items: _years,
             onChanged: (val) => setState(() => _selectedYear = val),
           ),
-          const SizedBox(height: 16),
-
-          // Gender
         ],
       ),
     );
@@ -563,7 +619,6 @@ Navigator.pop(context);
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
-
     TextInputType? keyboardType,
     List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
@@ -649,7 +704,7 @@ Navigator.pop(context);
   }
 }
 
-// Custom painter for corner bracket scan effect
+// Corner bracket painter
 class _CornerBracketPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -658,23 +713,17 @@ class _CornerBracketPainter extends CustomPainter {
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
-
     const len = 12.0;
-
-    // Top-left
     canvas.drawLine(Offset(0, len), const Offset(0, 0), paint);
     canvas.drawLine(const Offset(0, 0), Offset(len, 0), paint);
-    // Top-right
     canvas.drawLine(Offset(size.width - len, 0), Offset(size.width, 0), paint);
     canvas.drawLine(Offset(size.width, 0), Offset(size.width, len), paint);
-    // Bottom-left
     canvas.drawLine(
       Offset(0, size.height - len),
       Offset(0, size.height),
       paint,
     );
     canvas.drawLine(Offset(0, size.height), Offset(len, size.height), paint);
-    // Bottom-right
     canvas.drawLine(
       Offset(size.width - len, size.height),
       Offset(size.width, size.height),
@@ -688,5 +737,5 @@ class _CornerBracketPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_CornerBracketPainter oldDelegate) => false;
+  bool shouldRepaint(_) => false;
 }
