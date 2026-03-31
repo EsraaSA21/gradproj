@@ -20,4 +20,28 @@ class Student {
     required this.email,
    
   });
+  factory Student.fromJson(Map<String, dynamic> json) {
+  return Student(
+    studentNumber: json['student_number'] ?? '',
+    nameEn: json['name_en'] ?? '',
+    nameAr: json['name_ar'] ?? '',
+    phone: json['phone'] ?? '',
+    faculty: json['faculty'] ?? '',
+    major: json['major'] ?? '',
+    year: json['year'] ?? '',
+    email: json['email'] ?? '',
+  );
+}
+Map<String, dynamic> toJson() {
+  return {
+    'student_number': studentNumber,
+    'name_en': nameEn,
+    'name_ar': nameAr,
+    'phone': phone,
+    'faculty': faculty,
+    'major': major,
+    'year': year,
+    'email': email,
+  };
+}
 }

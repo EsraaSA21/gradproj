@@ -1,7 +1,6 @@
 import 'package:faceapp/screens/verifier_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:faceapp/screens/selfitips.dart';
 import 'package:faceapp/screens/face_scan.dart'; // ✏️ غيّر المسار حسب مشروعك
 
 // ══════════════════════════════════════════════════════════════════════

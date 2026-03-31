@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:faceapp/screens/students_data.dart';
-import 'package:faceapp/models/student.dart';
 import 'dart:async';
 import 'package:faceapp/screens/face_video.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // 🔥 مهم
+import 'dart:convert'; // مهم
 
 class AddStudentsScreen extends StatefulWidget {
   const AddStudentsScreen({super.key});
@@ -15,6 +13,7 @@ class AddStudentsScreen extends StatefulWidget {
 }
 
 class AddStudentsScreenState extends State<AddStudentsScreen> {
+  bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
   bool _faceScanned = false;
   String? _videoPath; // مسار الفيديو بعد التسجيل
@@ -106,7 +105,9 @@ class AddStudentsScreenState extends State<AddStudentsScreen> {
   }
 
   Future<void> _submitForm() async {
-  
+   
+
+
     bool isFormValid = _formKey.currentState!.validate();
     bool isFaceValid = _faceScanned;
 
@@ -120,15 +121,13 @@ class AddStudentsScreenState extends State<AddStudentsScreen> {
       return;
     }
 
-    bool _isLoading;
     setState(() => _isLoading = true);
-
     try {
       var request = http.MultipartRequest(
         'POST',
         Uri.parse(
           'https://your-server.com/api/add-student',
-        ), // 🔁 حط رابطك الحقيقي
+        ), //  رابط API
       );
 
       request.files.add(
@@ -152,23 +151,33 @@ class AddStudentsScreenState extends State<AddStudentsScreen> {
 
       setState(() => _isLoading = false);
 
-      if (response.statusCode == 200 && data["success"] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Student added successfully ✅"),
-            backgroundColor: Colors.green,
-          ),
-        );
+     if (response.statusCode == 200 && data["success"] == true) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text("Student added successfully ✅"),
+      backgroundColor: Colors.green,
+    ),
+  );
 
-        Navigator.pop(context);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data["message"] ?? "Failed to add student ❌"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+  //  تفريغ الفورم
+  _formKey.currentState!.reset();
+
+  _fullNameEnglishController.clear();
+  _studentNumberController.clear();
+  _fullNameArabicController.clear();
+  _phoneController.clear();
+  _emailController.clear();
+
+  setState(() {
+    _selectedCollege = null;
+    _selectedMajor = null;
+    _selectedYear = null;
+    _faceScanned = false;
+    _videoPath = null;
+  });
+
+  Navigator.pop(context);
+}
     } catch (e) {
       setState(() => _isLoading = false);
 

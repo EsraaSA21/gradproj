@@ -1,4 +1,4 @@
-import 'package:faceapp/screens/face_scan.dart';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; 
 import 'package:faceapp/screens/verified_student.dart';
@@ -14,10 +14,9 @@ import 'package:faceapp/screens/verifier_screen.dart';
 // SCREEN
 // ══════════════════════════════════════════════════════════════════════
 class VerificationSuccessScreen extends StatefulWidget {
-  /// بتقدر تمرر الـ data من الباك اند مباشرة
-  final VerifiedStudent? student;
-
-  const VerificationSuccessScreen({super.key, this.student});
+  
+final Map<String, dynamic> data;
+const VerificationSuccessScreen({required this.data});
 
   @override
   State<VerificationSuccessScreen> createState() =>
@@ -41,25 +40,14 @@ class _VerificationSuccessScreenState extends State<VerificationSuccessScreen>
   // بيانات تجريبية لو ما في بيانات من الباك اند
   late VerifiedStudent _student;
 
-  @override
-  void initState() {
-    super.initState();
 
-    _student = widget.student ??
-        VerifiedStudent(
-          name:             "Ahmed Hassan",
-          studentId:        "20241234",
-          faculty:          "Information Technology",
-          major:            "Computer Science",
-          yearLevel:        "3rd Year",
-          verificationTime: DateFormat('hh:mm a').format(DateTime.now()),
-          status:           "Authorized",
-          date:             DateFormat('EEEE, MMMM d, y').format(DateTime.now()),
-        );
+@override
+void initState() {
+  super.initState();
+_student = VerifiedStudent.fromJson(widget.data);
 
-    _initAnimations();
-  }
-
+  _initAnimations();
+}
   void _initAnimations() {
     // Check icon
     _checkController = AnimationController(
@@ -120,6 +108,7 @@ class _VerificationSuccessScreenState extends State<VerificationSuccessScreen>
 
   @override
   Widget build(BuildContext context) {
+
     final double w = MediaQuery.of(context).size.width;
     final double h = MediaQuery.of(context).size.height;
     double fs(double s) => s * (w / 375).clamp(0.85, 1.3);

@@ -61,13 +61,13 @@ class StudentDetailsSheet extends StatelessWidget {
 
           /// 🔹 Email
           buildCard(Icons.email_outlined, "Email",
-              student.email ?? "No Email"),
+              student.email),
 
           const SizedBox(height: 12),
 
           /// 🔹 Phone
           buildCard(Icons.phone_outlined, "Phone",
-              student.phone ?? "No Phone"),
+              student.phone),
 
           const SizedBox(height: 12),
 
