@@ -1,33 +1,55 @@
-import 'package:faceapp/screens/students_data.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:faceapp/models/student.dart';
 import 'package:faceapp/screens/students_details_sheet.dart';
-
+import 'package:faceapp/config/api_config.dart';
 class StudentsListScreen extends StatefulWidget {
   @override
   State<StudentsListScreen> createState() => _StudentsListScreenState();
 }
 
 class _StudentsListScreenState extends State<StudentsListScreen> {
-  List<Student> filteredStudents = [];
-  TextEditingController searchController = TextEditingController();
+List<Student> allStudents = [];
+List<Student> filteredStudents = [];
+TextEditingController searchController = TextEditingController();
+bool isLoading = true; 
 
   @override
   void initState() {
     super.initState();
-    filteredStudents = List.from(students);
+    fetchStudents();
   }
-
-  void searchStudent(String query) {
-    final results = students.where((student) {
-      return student.nameEn.toLowerCase().contains(query.toLowerCase()) ||
-          student.studentNumber.contains(query);
-    }).toList();
-
-    setState(() {
-      filteredStudents = results;
-    });
+Future<void> fetchStudents() async {
+  try {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/students'),
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      final List<Student> loaded = data.map((e) => Student.fromJson(e)).toList();
+      setState(() {
+        allStudents = loaded;
+        filteredStudents = loaded;
+        isLoading = false;
+      });
+    } else {
+      setState(() => isLoading = false);
+    }
+  } catch (e) {
+    setState(() => isLoading = false);
   }
+}
+void searchStudent(String query) {
+  final results = allStudents.where((student) {
+    return student.nameEn.toLowerCase().contains(query.toLowerCase()) ||
+        student.studentNumber.contains(query);
+  }).toList();
+
+  setState(() {
+    filteredStudents = results;
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +57,9 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
       backgroundColor: Colors.grey.shade100,
 
       body: CustomScrollView(
+
         slivers: [
-          // 🔥 HEADER (ثابت)
+
           SliverAppBar(
             automaticallyImplyLeading: false,
             expandedHeight: 130,
@@ -114,9 +137,13 @@ class _StudentsListScreenState extends State<StudentsListScreen> {
               ),
             ),
           ),
-
+isLoading
+    ? const SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(child: CircularProgressIndicator()),
+      )
           // 📋 LIST
-          filteredStudents.isEmpty
+          :filteredStudents.isEmpty
               ? SliverFillRemaining(
                   hasScrollBody: false,
                   child: Center(

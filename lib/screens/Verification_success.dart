@@ -1,18 +1,11 @@
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; 
-import 'package:faceapp/screens/verified_student.dart';
+
+import 'package:faceapp/models/verified_student.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:faceapp/screens/verifier_screen.dart';
 
-// ══════════════════════════════════════════════════════════════════════
-// MODEL — البيانات القادمة من الباك اند بعد نجاح الـ face scan
-// ══════════════════════════════════════════
 
-
-// ══════════════════════════════════════════════════════════════════════
-// SCREEN
-// ══════════════════════════════════════════════════════════════════════
 class VerificationSuccessScreen extends StatefulWidget {
   
 final Map<String, dynamic> data;
@@ -37,7 +30,7 @@ class _VerificationSuccessScreenState extends State<VerificationSuccessScreen>
   late Animation<Offset> _bottomSlide;
   late Animation<double> _bottomOpacity;
 
-  // بيانات تجريبية لو ما في بيانات من الباك اند
+
   late VerifiedStudent _student;
 
 

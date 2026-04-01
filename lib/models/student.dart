@@ -1,4 +1,4 @@
-class Student {
+class Student{
   final String studentNumber;
   final String nameEn;
   final String nameAr;
@@ -22,13 +22,13 @@ class Student {
   });
   factory Student.fromJson(Map<String, dynamic> json) {
   return Student(
-    studentNumber: json['student_number'] ?? '',
-    nameEn: json['name_en'] ?? '',
-    nameAr: json['name_ar'] ?? '',
-    phone: json['phone'] ?? '',
+    studentNumber: json['student_no'] ?? '',
+    nameEn: json['full_name_en'] ?? '',
+    nameAr: json['full_name_ar'] ?? '',
+    phone: json['phone_number'] ?? '',
     faculty: json['faculty'] ?? '',
     major: json['major'] ?? '',
-    year: json['year'] ?? '',
+    year: json['year_level']?.toString() ?? '',
     email: json['email'] ?? '',
   );
 }

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:faceapp/screens/verification_success.dart';
 import 'package:faceapp/screens/verification_failed.dart';
-import 'package:faceapp/models/verified_student.dart';
-import 'dart:math';
+//import 'package:faceapp/models/verified_student.dart';
+//import 'dart:math';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -134,17 +134,19 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     if (!mounted) return;
 
     if (response['success'] == true) {
-      setState(() {
-        _scanStatus = "✓ Verified";
-      });
+  setState(() {
+    _scanStatus = "✓ Verified";
+  });
 
-      await Future.delayed(Duration(milliseconds: 700));
+  await Future.delayed(Duration(milliseconds: 700));
 
-    Navigator.push(
-       context, 
-       MaterialPageRoute( 
-        builder: (context) => VerificationSuccessScreen(), ), );
-    } else {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => VerificationSuccessScreen(data: response), 
+    ),
+  );
+} else {
       setState(() {
         _scanStatus = "✖ Not recognized";
       });

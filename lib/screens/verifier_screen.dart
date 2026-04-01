@@ -6,13 +6,18 @@ import 'package:faceapp/screens/settings.dart';
 
 
 class Verifierscreen extends StatefulWidget {
-  const Verifierscreen({super.key});
+  final String ? username;
+
+
+
+  const Verifierscreen({super.key,  this.username});
 
   @override
   State<Verifierscreen> createState() => _VerifierscreenState();
 }
 
 class _VerifierscreenState extends State<Verifierscreen> {
+
   String lastScan = "--:--";
   String status = "Loading...";
 
@@ -73,7 +78,7 @@ class _VerifierscreenState extends State<Verifierscreen> {
                           style: TextStyle(color: Colors.white, fontSize: 18),
                         ),
                         Text(
-                          "Verifier",
+                          widget.username ?? "User",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 20,
