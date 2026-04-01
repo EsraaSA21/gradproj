@@ -1,3 +1,4 @@
+import 'package:faceapp/config/user_session.dart';
 import 'package:faceapp/screens/second_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:faceapp/screens/selfitips.dart';
@@ -6,12 +7,9 @@ import 'package:faceapp/screens/settings.dart';
 
 
 class Verifierscreen extends StatefulWidget {
-  final String ? username;
 
-
-
-  const Verifierscreen({super.key,  this.username});
-
+ final Map<String, dynamic> userData;
+  const Verifierscreen({super.key, required this.userData});
   @override
   State<Verifierscreen> createState() => _VerifierscreenState();
 }
@@ -78,7 +76,7 @@ class _VerifierscreenState extends State<Verifierscreen> {
                           style: TextStyle(color: Colors.white, fontSize: 18),
                         ),
                         Text(
-                          widget.username ?? "User",
+                         currentUser['username'] ?? "User",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 20,
@@ -146,7 +144,7 @@ class _VerifierscreenState extends State<Verifierscreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ProfileScreen(),
+                          builder: (context) => ProfileScreen(userData: currentUser),
                             ),
                           );
                         } else if (selected == 'settings') {

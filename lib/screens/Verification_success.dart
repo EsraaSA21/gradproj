@@ -1,4 +1,5 @@
 
+import 'package:faceapp/config/user_session.dart';
 import 'package:flutter/material.dart';
 
 import 'package:faceapp/models/verified_student.dart';
@@ -533,7 +534,7 @@ _student = VerifiedStudent.fromJson(widget.data);
        Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) =>Verifierscreen(),
+         builder: (context) => Verifierscreen(userData: currentUser),
         ),
         (route) => false,
       );

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:faceapp/models/users.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final Map<String, dynamic> userData;
+  const ProfileScreen({super.key, required this.userData});
 
   @override
   Widget build(BuildContext context) {
+    final user = User.fromJson(userData);
     return Scaffold(
       backgroundColor: const Color(0xFFF2F5F9),
 
@@ -28,12 +31,9 @@ class ProfileScreen extends StatelessWidget {
                   bottomRight: Radius.circular(30),
                 ),
               ),
-             
-              
+
               child: Column(
-                 
                 children: [
-                 
                   Container(
                     width: 100,
                     height: 100,
@@ -50,9 +50,8 @@ class ProfileScreen extends StatelessWidget {
 
                   const SizedBox(height: 15),
 
-                  // 🔹 Username
-                  const Text(
-                    "Ahmed",
+                  Text(
+                    user.username,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -62,95 +61,86 @@ class ProfileScreen extends StatelessWidget {
 
                   const SizedBox(height: 5),
 
-                  // 🔹 ID
-                  const Text(
-                    "2024-1001",
-                    style: TextStyle(color: Colors.white70),
-                  ),
+                  Text(user.id, style: TextStyle(color: Colors.white70)),
                 ],
               ),
             ),
 
             const SizedBox(height: 20),
-          
 
             SizedBox(height: 20),
-Container(
-  margin: const EdgeInsets.symmetric(horizontal: 15),
-  padding: const EdgeInsets.all(15),
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(20),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.08),
-        blurRadius: 10,
-      ),
-    ],
-  ),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 15),
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
 
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.mail, size: 20, color: Colors.blue),
+                      ),
 
-      Row(
-        children: [
-          Container(
-  padding: EdgeInsets.all(6),
-  decoration: BoxDecoration(
-    color: Colors.blue.withOpacity(0.1),
-    borderRadius: BorderRadius.circular(8),
-  ),
-  child: Icon(Icons.mail, size: 20, color: Colors.blue),
-),
+                      const SizedBox(width: 10),
 
-          const SizedBox(width: 10),
+                      Text(
+                        "Contact Information",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
 
-          Text(
-            "Contact Information",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade800,
+                  const SizedBox(height: 10),
+
+                  Divider(color: const Color.fromARGB(255, 197, 195, 195)),
+
+                  const SizedBox(height: 10),
+
+                  // 🔹 البيانات
+                  InfoRow(
+                    icon: Icons.person_outlined,
+                    title: "Full Name",
+                    value: user.fullName,
+                  ),
+
+                  Divider(color: const Color.fromARGB(255, 197, 195, 195)),
+
+                  InfoRow(
+                    icon: Icons.email_outlined,
+                    title: "Email",
+                    value: user.email,
+                  ),
+
+                  Divider(color: const Color.fromARGB(255, 197, 195, 195)),
+
+                  InfoRow(
+                    icon: Icons.phone_outlined,
+                    title: "Phone Number",
+                    value: user.phone,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],    
-      )
-      ,
-      
-
-      const SizedBox(height: 10),
-
-      Divider(color: const Color.fromARGB(255, 197, 195, 195)),
-
-      const SizedBox(height: 10),
-
-      // 🔹 البيانات
-      InfoRow(
-        
-        icon: Icons.person_outlined,
-        title: "Full Name",
-        value: "Ahmed Hassan",
-      ),
-
-     Divider(color: const Color.fromARGB(255, 197, 195, 195)),
-
-      InfoRow(
-        icon: Icons.email_outlined,
-        title: "Email",
-        value: "ahmed@email.com",
-      ),
-
-     Divider(color: const Color.fromARGB(255, 197, 195, 195)),
-
-      InfoRow(
-        icon: Icons.phone_outlined,
-        title: "Phone Number",
-        value: "+970 599 123 456",
-      ),
-    ],
-  ),
-)
           ],
         ),
       ),
@@ -158,9 +148,6 @@ Container(
   }
 }
 
-//////////////////////////////////////////////////////
-// 🔹 INFO ROW
-//////////////////////////////////////////////////////
 class InfoRow extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -180,12 +167,12 @@ class InfoRow extends StatelessWidget {
       child: Row(
         children: [
           Container(
-  padding: EdgeInsets.all(6),
-  decoration: BoxDecoration(
-    color: const Color.fromARGB(255, 165, 171, 177).withOpacity(0.1),
-    borderRadius: BorderRadius.circular(10),
-  ),
-  child:Icon(icon, color: const Color.fromARGB(255, 49, 50, 52)),
+            padding: EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 165, 171, 177).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: const Color.fromARGB(255, 49, 50, 52)),
           ),
 
           const SizedBox(width: 10),
@@ -194,7 +181,12 @@ class InfoRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Color.fromARGB(255, 133, 133, 133))),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color.fromARGB(255, 133, 133, 133),
+                  ),
+                ),
 
                 Text(
                   value,

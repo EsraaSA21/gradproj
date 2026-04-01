@@ -1,3 +1,4 @@
+import 'package:faceapp/config/user_session.dart';
 import 'package:faceapp/screens/verifier_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -416,7 +417,7 @@ return WillPopScope(
            Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) =>Verifierscreen(),
+     builder: (context) => Verifierscreen(userData: currentUser),
         ),
         (route) => false,
       );

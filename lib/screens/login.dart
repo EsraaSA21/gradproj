@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:faceapp/config/user_session.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -63,28 +64,28 @@ class _LoginState extends State<Login> {
     );
   }
 
-  void _goToRoleScreen(String role, String username) {
-    final normalizedRole = role.trim().toLowerCase();
+  void _goToRoleScreen(String role, Map<String, dynamic> userData) {
+  final normalizedRole = role.trim().toLowerCase();
 
-    if (normalizedRole == "admin") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const AdminScreen()),
-      );
-    } else if (normalizedRole == "verifier") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => Verifierscreen(username: username)),
-      );
-    } else if (normalizedRole == "registrar") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const RegistrarScreen()),
-      );
-    } else {
-      _showMessage("Unknown user role: $role", backgroundColor: Colors.red);
-    }
+  if (normalizedRole == "verifier") {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Verifierscreen(userData: userData),
+      ),
+    );
+  } else if (normalizedRole == "registrar") {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const RegistrarScreen()),
+    );
+  } else if (normalizedRole == "admin") {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const AdminScreen()),
+    );
   }
+}
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
@@ -110,8 +111,9 @@ class _LoginState extends State<Login> {
         return;
       }
       final username = result["username"]?.toString() ?? "";
+      currentUser = result;
       _showMessage("Login successful", backgroundColor: Colors.green);
-      _goToRoleScreen(role, username);
+      _goToRoleScreen(role, result);
       
     } catch (e) {
       _showMessage(e.toString(), backgroundColor: Colors.red);

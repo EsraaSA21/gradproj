@@ -255,7 +255,7 @@ class AddStudentsScreenState extends State<AddStudentsScreen> {
         "major": _selectedMajor,
         "year_level": yearLevel,
         "photo_url": null,
-        "email": _emailController.text.trim(),
+        
         
       };
 
