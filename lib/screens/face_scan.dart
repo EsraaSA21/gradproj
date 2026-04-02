@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:faceapp/screens/verification_success.dart';
 import 'package:faceapp/screens/verification_failed.dart';
-//import 'package:faceapp/models/verified_student.dart';
-//import 'dart:math';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 

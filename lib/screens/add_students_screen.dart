@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:camera/camera.dart';
-import 'package:faceapp/screens/students_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;

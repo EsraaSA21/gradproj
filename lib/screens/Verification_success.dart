@@ -1,7 +1,6 @@
 
 import 'package:faceapp/config/user_session.dart';
 import 'package:flutter/material.dart';
-
 import 'package:faceapp/models/verified_student.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:faceapp/screens/verifier_screen.dart';
@@ -10,7 +9,7 @@ import 'package:faceapp/screens/verifier_screen.dart';
 class VerificationSuccessScreen extends StatefulWidget {
   
 final Map<String, dynamic> data;
-const VerificationSuccessScreen({required this.data});
+const VerificationSuccessScreen({super.key, required this.data});
 
   @override
   State<VerificationSuccessScreen> createState() =>

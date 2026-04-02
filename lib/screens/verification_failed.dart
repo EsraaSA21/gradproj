@@ -2,13 +2,9 @@ import 'package:faceapp/config/user_session.dart';
 import 'package:faceapp/screens/verifier_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:faceapp/screens/face_scan.dart'; // ✏️ غيّر المسار حسب مشروعك
-
-// ══════════════════════════════════════════════════════════════════════
-// SCREEN
-// ══════════════════════════════════════════════════════════════════════
+import 'package:faceapp/screens/face_scan.dart'; 
 class VerificationFailedScreen extends StatefulWidget {
-  /// رسالة الخطأ من الباك اند — لو ما في، بتستخدم الافتراضية
+ 
   final String? errorMessage;
 
   const VerificationFailedScreen({super.key, this.errorMessage});
