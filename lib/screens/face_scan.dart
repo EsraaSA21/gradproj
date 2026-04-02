@@ -10,21 +10,115 @@ class ApiService {
   static Future<Map<String, dynamic>> verifyFace(String imagePath) async {
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://10.0.2.2:5000/verify'),// تغيير للحقيقي
+      Uri.parse('http://192.168.1.12:8000'),
     );
-
     request.files.add(await http.MultipartFile.fromPath('image', imagePath));
-
     var response = await request.send();
-
     var resBody = await response.stream.bytesToString();
     return jsonDecode(resBody);
   }
 }
 
 // ══════════════════════════════════════════════════════════════════════
-// FACE SCAN SCREEN
+// BREAKPOINTS HELPER
 // ══════════════════════════════════════════════════════════════════════
+class _Responsive {
+  final double w;
+  final double h;
+
+  _Responsive(BuildContext context)
+      : w = MediaQuery.of(context).size.width,
+        h = MediaQuery.of(context).size.height;
+
+  // Breakpoints
+  bool get isSmall => w < 360;        
+  bool get isMedium => w < 480;       
+  bool get isLarge => w < 768;      
+  bool get isTablet => w >= 768;      
+
+  // Frame size
+  double get frameW {
+    if (isSmall) return w * 0.72;
+    if (isMedium) return w * 0.68;
+    if (isLarge) return w * 0.60;
+    return w * 0.45;              
+  }
+
+  double get frameH {
+    if (isSmall) return h * 0.38;
+    if (isMedium) return h * 0.42;
+    if (isLarge) return h * 0.40;
+    return h * 0.50;                  
+  }
+
+  // Typography
+  double get titleSize {
+    if (isSmall) return 16;
+    if (isMedium) return 20;
+    if (isLarge) return 22;
+    return 26;
+  }
+
+  double get statusSize {
+    if (isSmall) return 12;
+    if (isMedium) return 15;
+    return 17;
+  }
+
+  // Button
+  double get captureButtonSize {
+    if (isSmall) return 65;
+    if (isMedium) return 80;
+    if (isLarge) return 88;
+    return 100;
+  }
+
+  double get captureIconSize {
+    if (isSmall) return 26;
+    if (isMedium) return 34;
+    if (isLarge) return 38;
+    return 44;
+  }
+
+  // Positions
+  double get statusBottomRatio {
+    if (isSmall) return 0.20;
+    if (isMedium) return 0.22;
+    return 0.20;
+  }
+
+  double get dotsBottomRatio {
+    if (isSmall) return 0.155;
+    if (isMedium) return 0.175;
+    return 0.16;
+  }
+
+  double get captureButtonBottomRatio {
+    if (isSmall) return 0.04;
+    if (isMedium) return 0.055;
+    return 0.05;
+  }
+
+  // Padding
+  double get horizontalPadding {
+    if (isTablet) return w * 0.08;
+    return w * 0.05;
+  }
+
+  // Back button
+  double get backButtonPadding {
+    if (isSmall) return 8;
+    return 10;
+  }
+
+  double get backIconSize {
+    if (isSmall) return 15;
+    if (isMedium) return 18;
+    return 20;
+  }
+}
+
+
 class FaceScanScreen extends StatefulWidget {
   const FaceScanScreen({super.key});
 
@@ -110,108 +204,87 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     super.dispose();
   }
 
-  // ── Capture & Scan ───────────────────────────────────────────────────
   Future<void> _captureAndScan() async {
-  if (_isScanning) return;
+    if (_isScanning) return;
+    if (_cameraController == null || !_cameraController!.value.isInitialized) return;
 
-  if (_cameraController == null || !_cameraController!.value.isInitialized) {
-    return;
-  }
-
-  try {
-    setState(() {
-      _isScanning = true;
-      _scanStatus = "Scanning...";
-    });
-
-    final XFile image = await _cameraController!.takePicture();
-
-    final response = await ApiService.verifyFace(image.path)
-        .timeout(Duration(seconds: 10));
-
-    if (!mounted) return;
-
-    if (response['success'] == true) {
-  setState(() {
-    _scanStatus = "✓ Verified";
-  });
-
-  await Future.delayed(Duration(milliseconds: 700));
-
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => VerificationSuccessScreen(data: response), 
-    ),
-  );
-} else {
+    try {
       setState(() {
-        _scanStatus = "✖ Not recognized";
+        _isScanning = true;
+        _scanStatus = "Scanning...";
       });
 
-      await Future.delayed(Duration(milliseconds: 700));
+      final XFile image = await _cameraController!.takePicture();
+      final response = await ApiService.verifyFace(image.path)
+          .timeout(const Duration(seconds: 10));
 
-    Navigator.push(
-       context,
-        MaterialPageRoute( builder: (context) => VerificationFailedScreen(), ), );
+      if (!mounted) return;
+
+      if (response['success'] == true) {
+        setState(() => _scanStatus = "✓ Verified");
+        await Future.delayed(const Duration(milliseconds: 700));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VerificationSuccessScreen(data: response),
+          ),
+        );
+      } else {
+        setState(() => _scanStatus = "✖ Not recognized");
+        await Future.delayed(const Duration(milliseconds: 700));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => VerificationFailedScreen()),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _scanStatus = "Error");
+      await Future.delayed(const Duration(milliseconds: 700));
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => VerificationFailedScreen()),
+      );
+    } finally {
+      if (!mounted) return;
+      setState(() => _isScanning = false);
     }
-
-  } catch (e) {
-    if (!mounted) return;
-
-    setState(() {
-      _scanStatus = "Error";
-    });
-
-    await Future.delayed(Duration(milliseconds: 700));
-
-    Navigator.push(
-       context,
-        MaterialPageRoute( builder: (context) => VerificationFailedScreen(), ), );
-  } finally {
-    if (!mounted) return;
-
-    setState(() {
-      _isScanning = false;
-    });
   }
-}
+
   @override
   Widget build(BuildContext context) {
-    final double w = MediaQuery.of(context).size.width;
-    final double h = MediaQuery.of(context).size.height;
-    final double frameW = w * 0.68;
-    final double frameH = h * 0.42;
+    final r = _Responsive(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFF050D1A),
       body: Stack(
         children: [
-        
+
+         
           _isCameraReady && _cameraController != null
               ? Positioned.fill(child: CameraPreview(_cameraController!))
               : Positioned.fill(
                   child: Container(color: const Color(0xFF050D1A)),
                 ),
 
-          // ── Oval cutout overlay ──────────────────────────────────
+        
           Positioned.fill(
-            child: _OvalCutoutOverlay(frameW: frameW, frameH: frameH),
+            child: _OvalCutoutOverlay(frameW: r.frameW, frameH: r.frameH),
           ),
 
-          // ── Scan line ────────────────────────────────────────────
+       
           Center(
             child: SizedBox(
-              width: frameW,
-              height: frameH,
+              width: r.frameW,
+              height: r.frameH,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(frameW / 2),
+                borderRadius: BorderRadius.circular(r.frameW / 2),
                 child: AnimatedBuilder(
                   animation: _scanLineAnim,
                   builder: (_, __) => Stack(
                     children: [
                       Positioned(
-                        top: frameH * _scanLineAnim.value - 1,
+                        top: r.frameH * _scanLineAnim.value - 1,
                         left: 0,
                         right: 0,
                         child: AnimatedBuilder(
@@ -249,13 +322,13 @@ class _FaceScanScreenState extends State<FaceScanScreen>
             ),
           ),
 
-          // ── Corner brackets ──────────────────────────────────────
+       
           Center(
             child: FadeTransition(
               opacity: _cornerAnim,
               child: SizedBox(
-                width: frameW + 24,
-                height: frameH + 24,
+                width: r.frameW + 24,
+                height: r.frameH + 24,
                 child: CustomPaint(
                   painter: _CornerBracketsPainter(
                     color: const Color(0xFF00D4FF),
@@ -266,27 +339,22 @@ class _FaceScanScreenState extends State<FaceScanScreen>
             ),
           ),
 
-          // ── Oval glow border ─────────────────────────────────────
+       
           Center(
             child: AnimatedBuilder(
               animation: _pulseAnim,
               builder: (_, __) => Container(
-                width: frameW,
-                height: frameH,
+                width: r.frameW,
+                height: r.frameH,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(frameW / 2),
+                  borderRadius: BorderRadius.circular(r.frameW / 2),
                   border: Border.all(
                     color: Color.fromRGBO(0, 212, 255, _pulseAnim.value * 0.6),
                     width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Color.fromRGBO(
-                        0,
-                        212,
-                        255,
-                        _pulseAnim.value * 0.25,
-                      ),
+                      color: Color.fromRGBO(0, 212, 255, _pulseAnim.value * 0.25),
                       blurRadius: 20,
                       spreadRadius: 2,
                     ),
@@ -296,7 +364,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
             ),
           ),
 
-          // ── Top bar ──────────────────────────────────────────────
+         
           Positioned(
             top: 0,
             left: 0,
@@ -304,7 +372,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
             child: SafeArea(
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: w * 0.05,
+                  horizontal: r.horizontalPadding,
                   vertical: 12,
                 ),
                 child: Row(
@@ -312,7 +380,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: EdgeInsets.all(r.backButtonPadding),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
@@ -320,19 +388,19 @@ class _FaceScanScreenState extends State<FaceScanScreen>
                             color: Colors.white.withOpacity(0.15),
                           ),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.arrow_back_ios_new,
                           color: Colors.white,
-                          size: 18,
+                          size: r.backIconSize,
                         ),
                       ),
                     ),
                     const SizedBox(width: 14),
-                    const Text(
+                    Text(
                       "Face Scan",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: r.titleSize,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
                       ),
@@ -345,7 +413,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
 
           // ── Status text ──────────────────────────────────────────
           Positioned(
-            bottom: h * 0.22,
+            bottom: r.h * r.statusBottomRatio,
             left: 0,
             right: 0,
             child: AnimatedBuilder(
@@ -359,9 +427,9 @@ class _FaceScanScreenState extends State<FaceScanScreen>
                     color: _scanStatus.contains("✓")
                         ? Colors.greenAccent
                         : _scanStatus.contains("✗")
-                        ? Colors.redAccent
-                        : const Color(0xFF00D4FF),
-                    fontSize: 15,
+                            ? Colors.redAccent
+                            : const Color(0xFF00D4FF),
+                    fontSize: r.statusSize,
                     letterSpacing: 0.8,
                   ),
                 ),
@@ -369,9 +437,8 @@ class _FaceScanScreenState extends State<FaceScanScreen>
             ),
           ),
 
-          // ── Dots ─────────────────────────────────────────────────
           Positioned(
-            bottom: h * 0.175,
+            bottom: r.h * r.dotsBottomRatio,
             left: 0,
             right: 0,
             child: Row(
@@ -401,9 +468,9 @@ class _FaceScanScreenState extends State<FaceScanScreen>
             ),
           ),
 
-          // ── Capture button ───────────────────────────────────────
+     
           Positioned(
-            bottom: h * 0.055,
+            bottom: r.h * r.captureButtonBottomRatio,
             left: 0,
             right: 0,
             child: Center(
@@ -413,8 +480,8 @@ class _FaceScanScreenState extends State<FaceScanScreen>
                   animation: _pulseAnim,
                   builder: (_, __) => AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    width: 80,
-                    height: 80,
+                    width: r.captureButtonSize,
+                    height: r.captureButtonSize,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
@@ -441,17 +508,17 @@ class _FaceScanScreenState extends State<FaceScanScreen>
                       ],
                     ),
                     child: _isScanning
-                        ? const Padding(
-                            padding: EdgeInsets.all(22),
-                            child: CircularProgressIndicator(
+                        ? Padding(
+                            padding: EdgeInsets.all(r.captureButtonSize * 0.27),
+                            child: const CircularProgressIndicator(
                               color: Colors.white,
                               strokeWidth: 2.5,
                             ),
                           )
-                        : const Icon(
+                        : Icon(
                             Icons.camera_alt_rounded,
                             color: Colors.white,
-                            size: 34,
+                            size: r.captureIconSize,
                           ),
                   ),
                 ),
@@ -464,21 +531,21 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════
-// PAINTERS
-// ══════════════════════════════════════════════════════════════════════
+
 class _OvalCutoutOverlay extends StatelessWidget {
   final double frameW, frameH;
   const _OvalCutoutOverlay({required this.frameW, required this.frameH});
+
   @override
   Widget build(BuildContext context) => CustomPaint(
-    painter: _OvalCutoutPainter(frameW: frameW, frameH: frameH),
-  );
+        painter: _OvalCutoutPainter(frameW: frameW, frameH: frameH),
+      );
 }
 
 class _OvalCutoutPainter extends CustomPainter {
   final double frameW, frameH;
   _OvalCutoutPainter({required this.frameW, required this.frameH});
+
   @override
   void paint(Canvas canvas, Size size) {
     final c = Offset(size.width / 2, size.height / 2);
@@ -501,6 +568,7 @@ class _OvalCutoutPainter extends CustomPainter {
 class _CornerBracketsPainter extends CustomPainter {
   final Color color, glowColor;
   _CornerBracketsPainter({required this.color, required this.glowColor});
+
   @override
   void paint(Canvas canvas, Size size) {
     const len = 28.0, r = 10.0, sw = 3.0;
