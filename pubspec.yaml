@@ -37,6 +37,8 @@ dependencies:
   http: ^1.2.1
   http_parser: ^4.0.2
   shared_preferences: ^2.2.3
+  flutter_native_splash: ^2.4.0
+
   
   
 
@@ -96,3 +98,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_native_splash:
+  color: "#FFFFFF"         
+  image: assets/Images/logo.jpeg  
+  color_dark: "#000000"    
+  image_dark: assets/Images/logo.jpeg  
+  android_12:
+    color: "#FFFFFF"
+    image: assets/Images/logo.jpeg
