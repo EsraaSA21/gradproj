@@ -3,14 +3,111 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:faceapp/screens/add_students_screen.dart';
 
+
+class _Responsive {
+  final double w;
+  final double h;
+
+  _Responsive(BuildContext context)
+      : w = MediaQuery.of(context).size.width,
+        h = MediaQuery.of(context).size.height;
+
+  bool get isSmall  => w < 360;
+  bool get isMedium => w < 480;
+  bool get isLarge  => w < 768;
+  bool get isTablet => w >= 768;
+
+  double dp(double size) {
+    if (isSmall)  return size * 0.85;
+    if (isMedium) return size * 1.0;
+    if (isLarge)  return size * 1.1;
+    return size * 1.25;
+  }
+
+  double fs(double size) {
+    if (isSmall)  return size * 0.88;
+    if (isMedium) return size * 1.0;
+    if (isLarge)  return size * 1.08;
+    return size * 1.2;
+  }
+
+  double get horizontalPadding {
+    if (isTablet) return w * 0.08;
+    if (isLarge)  return w * 0.06;
+    return w * 0.05;
+  }
+
+  int get gridCrossAxisCount {
+    if (isTablet) return 4;
+    if (isLarge)  return 2;
+    return 2;
+  }
+
+  double get gridChildAspectRatio {
+    if (isTablet) return 1.5;
+    if (isLarge)  return 1.2;
+    if (isSmall)  return 1.05;
+    return 1.15;
+  }
+
+  double get gridSpacing {
+    if (isTablet) return 20;
+    if (isSmall)  return 12;
+    return 16;
+  }
+
+  double get headerMinHeight {
+    if (isTablet) return 150;
+    if (isSmall)  return 100;
+    return 120;
+  }
+
+  double get headerIconSize {
+    if (isTablet) return 44;
+    if (isSmall)  return 28;
+    return 35;
+  }
+
+  double get headerIconPadding {
+    if (isTablet) return 16;
+    if (isSmall)  return 10;
+    return 12;
+  }
+
+  double get quickActionHeight {
+    if (isTablet) return 160;
+    if (isSmall)  return 115;
+    return 130;
+  }
+
+  double get quickActionIconSize {
+    if (isTablet) return 64;
+    if (isSmall)  return 44;
+    return 50;
+  }
+
+  double get quickActionIconInner {
+    if (isTablet) return 30;
+    if (isSmall)  return 20;
+    return 24;
+  }
+
+  double get statIconSize {
+    if (isTablet) return 26;
+    if (isSmall)  return 20;
+    return 24;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// REGISTRAR SCREEN
+// ══════════════════════════════════════════════════════════════════════
 class RegistrarScreen extends StatelessWidget {
   const RegistrarScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-    final double width = MediaQuery.of(context).size.width;
-    final bool isTablet = width > 600;
+    final r = _Responsive(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FB),
@@ -19,119 +116,143 @@ class RegistrarScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// ── HEADER ──────────────────────────────────────────────
-              const _RegistrarHeader(),
 
-              const SizedBox(height: 20),
+              // ── Header ───────────────────────────────────────────
+              _RegistrarHeader(r: r),
 
-              /// ── STATS GRID ──────────────────────────────────────────
+              SizedBox(height: r.dp(20)),
+
+              // ── Stats Grid ───────────────────────────────────────
+// ── Stats Grid ───────────────────────────────────────
+Padding(
+  padding: EdgeInsets.symmetric(horizontal: r.horizontalPadding),
+  child: Column(
+    children: [
+      Row(
+        children: [
+          Expanded(
+            child: statCard(
+              r: r,
+              icon: PhosphorIcons.users(),
+              title: "Total Students",
+              number: "1.2K",
+              gradientColors: const [
+                Color.fromARGB(255, 66, 41, 255),
+                Color.fromARGB(255, 103, 76, 255),
+              ],
+            ),
+          ),
+          SizedBox(width: r.gridSpacing),
+          Expanded(
+            child: statCard(
+              r: r,
+              icon: PhosphorIcons.bell(),
+              title: "Today's Scans",
+              number: "350",
+              gradientColors: const [
+                Color.fromARGB(255, 255, 25, 232),
+                Color.fromARGB(255, 144, 12, 164),
+              ],
+            ),
+          ),
+        ],
+      ),
+      SizedBox(height: r.gridSpacing),
+      Row(
+        children: [
+          Expanded(
+            child: statCard(
+              r: r,
+              icon: PhosphorIcons.checkCircle(),
+              title: "Success Rate",
+              number: "12.5K",
+              gradientColors: const [
+                Color.fromARGB(255, 50, 193, 128),
+                Color.fromARGB(255, 24, 164, 20),
+              ],
+            ),
+          ),
+          SizedBox(width: r.gridSpacing),
+          Expanded(
+            child: statCard(
+              r: r,
+              icon: PhosphorIcons.clock(),
+              title: "Active Users",
+              number: "4.8",
+              gradientColors: const [
+                Color.fromARGB(255, 235, 111, 22),
+                Color.fromARGB(255, 236, 65, 65),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+
+              SizedBox(height: r.dp(16)),
+
+              // ── Quick Actions Label ──────────────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                child: GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: isTablet ? 4 : 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: isTablet ? 1.5 : 1.15,
-                  children: [
-                    statCard(
-                      icon: PhosphorIcons.users(),
-                      title: "Total Students",
-                      number: "1.2K",
-                      gradientColors: const [
-                        Color.fromARGB(255, 66, 41, 255),
-                        Color.fromARGB(255, 103, 76, 255),
-                      ],
-                    ),
-                    statCard(
-                      icon: PhosphorIcons.bell(),
-                      title: "Today's Scans",
-                      number: "350",
-                      gradientColors: const [
-                        Color.fromARGB(255, 255, 25, 232),
-                        Color.fromARGB(255, 144, 12, 164),
-                      ],
-                    ),
-                    statCard(
-                      icon: PhosphorIcons.checkCircle(),
-                      title: "Success Rate",
-                      number: "12.5K",
-                      gradientColors: const [
-                        Color.fromARGB(255, 50, 193, 128),
-                        Color.fromARGB(255, 24, 164, 20),
-                      ],
-                    ),
-                    statCard(
-                      icon: PhosphorIcons.clock(),
-                      title: "Active Users",
-                      number: "4.8",
-                      gradientColors: const [
-                        Color.fromARGB(255, 235, 111, 22),
-                        Color.fromARGB(255, 236, 65, 65),
-                      ],
-                    ),
-                  ],
+                padding: EdgeInsets.symmetric(horizontal: r.horizontalPadding),
+                child: Text(
+                  "Quick Actions",
+                  style: TextStyle(fontSize: r.fs(19)),
                 ),
               ),
 
-              const SizedBox(height: 16),
+              SizedBox(height: r.dp(10)),
 
-              /// ── QUICK ACTIONS label ──────────────────────────────────
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 18),
-                child: Text("Quick Actions", style: TextStyle(fontSize: 19)),
-              ),
-
-              const SizedBox(height: 10),
-
-              /// ── QUICK ACTIONS — كارتين بس للـ Registrar ─────────────
+              // ── Quick Actions ────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18),
+                padding: EdgeInsets.symmetric(horizontal: r.horizontalPadding),
                 child: Row(
                   children: [
                     Expanded(
                       child: QuickActionCard(
-                            icon: PhosphorIconsBold.userPlus,
-                            title: "Add\nStudent",
-                            iconBg: const Color(0xFF2F49F5),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const AddStudentsScreen(),
-                                ),
-                              );
-                            },
-                          ),
+                        r: r,
+                        icon: PhosphorIconsBold.userPlus,
+                        title: "Add\nStudent",
+                        iconBg: const Color(0xFF2F49F5),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AddStudentsScreen(),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: r.dp(16)),
                     Expanded(
-                     child: QuickActionCard(
-                            icon: PhosphorIconsBold.listBullets,
-                            title: "Students\nList",
-                            iconBg: const Color(0xFF7A1CF0),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>  StudentsListScreen(),
-                                ),
-                              );
-                            },
-                          ),
+                      child: QuickActionCard(
+                        r: r,
+                        icon: PhosphorIconsBold.listBullets,
+                        title: "Students\nList",
+                        iconBg: const Color(0xFF7A1CF0),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => StudentsListScreen(),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              /// ── INFO BOX ─────────────────────────────────────────────
+              // ── Info Box ─────────────────────────────────────────
               Container(
                 width: double.infinity,
-                margin: const EdgeInsets.all(18),
+                margin: EdgeInsets.all(r.horizontalPadding),
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(255, 240, 252, 255),
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(r.dp(18)),
                   border: Border.all(color: Colors.blue),
                   boxShadow: const [
                     BoxShadow(
@@ -141,13 +262,13 @@ class RegistrarScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.all(13),
+                child: Padding(
+                  padding: EdgeInsets.all(r.dp(13)),
                   child: Text(
                     "Limited operational permissions. You can add or edit students, but you cannot delete them or modify system settings.",
                     style: TextStyle(
-                      fontSize: 13.5,
-                      color: Color.fromARGB(255, 69, 69, 69),
+                      fontSize: r.fs(13.5),
+                      color: const Color.fromARGB(255, 69, 69, 69),
                     ),
                   ),
                 ),
@@ -160,24 +281,22 @@ class RegistrarScreen extends StatelessWidget {
   }
 }
 
-/// ── HEADER ──────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+// HEADER
+// ══════════════════════════════════════════════════════════════════════
 class _RegistrarHeader extends StatelessWidget {
-  const _RegistrarHeader();
+  final _Responsive r;
+  const _RegistrarHeader({required this.r});
 
   @override
   Widget build(BuildContext context) {
-    final double height = MediaQuery.of(context).size.height;
-    final double width = MediaQuery.of(context).size.width;
-    final bool isTablet = width > 600;
-    final bool isSmall = width < 380;
-
     return Container(
-     constraints: const BoxConstraints(minHeight: 120),
-  width: double.infinity,
-  padding: EdgeInsets.symmetric(
-    horizontal: width * 0.05,
-    vertical: 16,
-  ),
+      constraints: BoxConstraints(minHeight: r.headerMinHeight),
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: r.horizontalPadding,
+        vertical: r.dp(16),
+      ),
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(20),
@@ -200,33 +319,33 @@ class _RegistrarHeader extends StatelessWidget {
                 "Welcome back",
                 style: TextStyle(
                   color: Colors.white70,
-                  fontSize: isSmall ? 13 : 16,
+                  fontSize: r.fs(r.isSmall ? 13 : 16),
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: r.dp(4)),
               Text(
                 "Registrar",
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: isTablet ? 26 : 22,
+                  fontSize: r.fs(r.isTablet ? 26 : 22),
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: r.dp(4)),
               Row(
                 children: [
                   Icon(
                     PhosphorIcons.circle(),
-                    size: 10,
+                    size: r.dp(10),
                     color: Colors.white70,
                   ),
-                  const SizedBox(width: 6),
-                  const Text(
+                  SizedBox(width: r.dp(6)),
+                  Text(
                     "Registrar",
                     style: TextStyle(
                       color: Colors.white70,
-                      fontSize: 13,
+                      fontSize: r.fs(13),
                     ),
                   ),
                 ],
@@ -245,11 +364,11 @@ class _RegistrarHeader extends StatelessWidget {
                 ),
               ],
             ),
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(r.headerIconPadding),
             child: Icon(
               PhosphorIcons.users(),
               color: Colors.blue,
-              size: isTablet ? 40 : 35,
+              size: r.headerIconSize,
             ),
           ),
         ],
@@ -258,60 +377,69 @@ class _RegistrarHeader extends StatelessWidget {
   }
 }
 
-/// ── STAT CARD ────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+// STAT CARD
+// ══════════════════════════════════════════════════════════════════════
 Widget statCard({
+  required _Responsive r,
   required IconData icon,
   required String title,
   required String number,
   required List<Color> gradientColors,
 }) {
   return Container(
-    padding: const EdgeInsets.all(12),
+    padding: EdgeInsets.all(r.dp(14)),
     decoration: BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(r.dp(18)),
       boxShadow: const [
         BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
       ],
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(r.dp(8)),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(r.dp(10)),
             gradient: LinearGradient(
               colors: gradientColors,
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
-          child: Icon(icon, color: Colors.white),
+          child: Icon(icon, color: Colors.white, size: r.statIconSize),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: r.dp(12)),
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color.fromARGB(255, 104, 104, 104),
+          style: TextStyle(
+            fontSize: r.fs(13),
+            color: const Color.fromARGB(255, 104, 104, 104),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: r.dp(4)),
         Text(
           number,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: r.fs(18),
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     ),
   );
 }
 
-/// ── QUICK ACTION CARD ────────────────────────────────────────────────────────
-
+// ══════════════════════════════════════════════════════════════════════
+// QUICK ACTION CARD
+// ══════════════════════════════════════════════════════════════════════
 class QuickActionCard extends StatelessWidget {
+  final _Responsive r;
   final IconData icon;
   final String title;
   final Color iconBg;
@@ -319,6 +447,7 @@ class QuickActionCard extends StatelessWidget {
 
   const QuickActionCard({
     super.key,
+    required this.r,
     required this.icon,
     required this.title,
     required this.iconBg,
@@ -329,13 +458,16 @@ class QuickActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(r.dp(22)),
       child: Container(
-        height: 130,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        height: r.quickActionHeight,
+        padding: EdgeInsets.symmetric(
+          horizontal: r.dp(10),
+          vertical: r.dp(12),
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(r.dp(22)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -348,26 +480,26 @@ class QuickActionCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 50,
-              height: 50,
+              width: r.quickActionIconSize,
+              height: r.quickActionIconSize,
               decoration: BoxDecoration(
                 color: iconBg,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(r.dp(16)),
               ),
               child: Icon(
                 icon,
                 color: Colors.white,
-                size: 24,
+                size: r.quickActionIconInner,
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: r.dp(10)),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 13.5,
+              style: TextStyle(
+                fontSize: r.fs(13.5),
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1F2937),
+                color: const Color(0xFF1F2937),
                 height: 1.3,
               ),
             ),
