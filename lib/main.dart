@@ -1,5 +1,6 @@
 
 import 'package:faceapp/screens/face_scan.dart';
+import 'package:faceapp/screens/verification_failed.dart';
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
 import 'package:faceapp/screens/selfitips.dart';
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: FaceScanScreen(), 
+      home: SplashScreen()
     );
   }
 }
